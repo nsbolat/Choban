@@ -2,31 +2,25 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
-    [SerializeField] private Rigidbody player1Rigidbody; // Player 1 Rigidbody
-    [SerializeField] private Rigidbody player2Rigidbody; // Player 2 Rigidbody
+    [SerializeField] private Rigidbody playerRigidbody; // Oyuncu Rigidbody
+    [SerializeField] private Animator playerAnimator; // Animator bileşeni
 
     [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
     [SerializeField] private float acceleration = 2f; // Hızlanma
     [SerializeField] private float deceleration = 5f; // Yavaşlama
+    [SerializeField] private float sprintMultiplier = 1.5f; // Sprint çarpanı
     [SerializeField] private LayerMask groundLayer;
 
-    private Rigidbody activePlayer; // Şu an kontrol edilen oyuncu
     private Vector3 targetPosition;
     private float currentSpeed = 0f; // Mevcut hız
     private bool isMoving = false;
+    private bool isSprinting = false; // Sprint durumu
 
     private void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // Sol tık ile Player 2'yi seç
-        {
-            activePlayer = player2Rigidbody;
-        }
-        else if (Input.GetMouseButtonDown(1)) // Sağ tık ile Player 1'i seç
-        {
-            activePlayer = player1Rigidbody;
-        }
+        isSprinting = Input.GetKey(KeyCode.LeftShift); // Shift'e basılıyken sprint
 
-        if (Input.GetMouseButton(0) || Input.GetMouseButton(1)) // Sol veya sağ tık basılıyken hareket
+        if (Input.GetMouseButton(0)) // Sol tık basılıyken hareket
         {
             RotateTowardsMouse();
             isMoving = true;
@@ -35,6 +29,9 @@ public class PlayerController : MonoBehaviour
         {
             isMoving = false;
         }
+
+        // Animator'deki speed değerini güncelle
+        playerAnimator.SetFloat("Speed", currentSpeed);
     }
 
     private void FixedUpdate()
@@ -51,50 +48,46 @@ public class PlayerController : MonoBehaviour
 
     private void RotateTowardsMouse()
     {
-        if (activePlayer == null) return;
-
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
         {
             targetPosition = hit.point;
-            Vector3 direction = (targetPosition - activePlayer.position).normalized;
+            Vector3 direction = (targetPosition - playerRigidbody.position).normalized;
             direction.y = 0; // Yalnızca yatay eksende dönüş
 
             if (direction != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
-                activePlayer.transform.rotation = Quaternion.Slerp(activePlayer.transform.rotation, targetRotation, Time.deltaTime * 10f);
+                playerRigidbody.transform.rotation = Quaternion.Slerp(playerRigidbody.transform.rotation, targetRotation, Time.deltaTime * 10f);
             }
         }
     }
 
     private void MoveTowardsTarget()
     {
-        if (activePlayer == null) return;
-
-        Vector3 moveDirection = (targetPosition - activePlayer.position).normalized;
+        Vector3 moveDirection = (targetPosition - playerRigidbody.position).normalized;
         moveDirection.y = 0; // Dikey hareketi önle
 
-        // Mevcut hızı yavaş yavaş artır
-        currentSpeed = Mathf.MoveTowards(currentSpeed, maxMoveSpeed, acceleration * Time.fixedDeltaTime);
+        float targetSpeed = maxMoveSpeed * (isSprinting ? sprintMultiplier : 1f);
 
-        activePlayer.MovePosition(activePlayer.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
+        // Mevcut hızı yavaş yavaş artır
+        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
+
+        playerRigidbody.MovePosition(playerRigidbody.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
     }
 
     private void SlowDown()
     {
-        if (activePlayer == null) return;
-
         if (currentSpeed > 0)
         {
             // Hızı yavaş yavaş azalt
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime);
-            activePlayer.MovePosition(activePlayer.position + activePlayer.transform.forward * currentSpeed * Time.fixedDeltaTime);
+            playerRigidbody.MovePosition(playerRigidbody.position + playerRigidbody.transform.forward * currentSpeed * Time.fixedDeltaTime);
         }
         else
         {
             // Hız sıfırsa tamamen dur
-            activePlayer.velocity = Vector3.zero;
+            playerRigidbody.velocity = Vector3.zero;
         }
     }
 }
