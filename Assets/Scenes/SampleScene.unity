@@ -1742,6 +1742,7 @@ MonoBehaviour:
   statusTextObject: {fileID: 1841227544}
   dayCounterText: {fileID: 2038837346}
   fadeDuration: 5
+  worldTime: {fileID: 416384295}
 --- !u!1 &1248191974
 GameObject:
   m_ObjectHideFlags: 0
