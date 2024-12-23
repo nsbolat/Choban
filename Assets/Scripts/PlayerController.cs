@@ -4,21 +4,25 @@ public class PlayerController : MonoBehaviour
 {
     [SerializeField] private Rigidbody playerRigidbody; // Oyuncu Rigidbody
     [SerializeField] private Animator playerAnimator; // Animator bileşeni
-
     [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
     [SerializeField] private float acceleration = 2f; // Hızlanma
     [SerializeField] private float deceleration = 5f; // Yavaşlama
     [SerializeField] private float sprintMultiplier = 1.5f; // Sprint çarpanı
-    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
+    [SerializeField] private GameObject _infoObject; // Hedef işareti
+    [SerializeField] private AnimationCurve rotationSpeedCurve; // Rotasyon eğrisi
+    [SerializeField] private float rotationTime = 1f; // Rotasyon süresi
 
     private Vector3 targetPosition;
     private float currentSpeed = 0f; // Mevcut hız
     private bool isMoving = false;
     private bool isSprinting = false; // Sprint durumu
+    private float rotationProgress = 0f; // Rotasyon ilerlemesi
 
     private void Update()
     {
         isSprinting = Input.GetKey(KeyCode.LeftShift); // Shift'e basılıyken sprint
+        cursorInfo();
 
         if (Input.GetMouseButton(0)) // Sol tık basılıyken hareket
         {
@@ -28,10 +32,10 @@ public class PlayerController : MonoBehaviour
         else
         {
             isMoving = false;
+            rotationProgress = 0f; // Hareket bitince rotasyon sıfırlanır
         }
 
-        // Animator'deki speed değerini güncelle
-        playerAnimator.SetFloat("Speed", currentSpeed);
+        playerAnimator.SetFloat("Speed", currentSpeed); // Animator speed güncelle
     }
 
     private void FixedUpdate()
@@ -43,6 +47,16 @@ public class PlayerController : MonoBehaviour
         else
         {
             SlowDown();
+        }
+    }
+
+    private void cursorInfo()
+    {
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
+        {
+            Vector3 targetPosition = hit.point;
+            _infoObject.transform.position = targetPosition;
         }
     }
 
@@ -58,7 +72,12 @@ public class PlayerController : MonoBehaviour
             if (direction != Vector3.zero)
             {
                 Quaternion targetRotation = Quaternion.LookRotation(direction);
-                playerRigidbody.transform.rotation = Quaternion.Slerp(playerRigidbody.transform.rotation, targetRotation, Time.deltaTime * 10f);
+
+                // Rotasyon eğrisini uygula
+                rotationProgress = Mathf.Clamp01(rotationProgress + Time.deltaTime / rotationTime);
+                float curveValue = rotationSpeedCurve.Evaluate(rotationProgress);
+
+                playerRigidbody.transform.rotation = Quaternion.Slerp(playerRigidbody.transform.rotation, targetRotation, curveValue);
             }
         }
     }
@@ -70,8 +89,7 @@ public class PlayerController : MonoBehaviour
 
         float targetSpeed = maxMoveSpeed * (isSprinting ? sprintMultiplier : 1f);
 
-        // Mevcut hızı yavaş yavaş artır
-        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
+        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime); // Hız artır
 
         playerRigidbody.MovePosition(playerRigidbody.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
     }
@@ -80,13 +98,11 @@ public class PlayerController : MonoBehaviour
     {
         if (currentSpeed > 0)
         {
-            // Hızı yavaş yavaş azalt
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime);
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime); // Hız azalt
             playerRigidbody.MovePosition(playerRigidbody.position + playerRigidbody.transform.forward * currentSpeed * Time.fixedDeltaTime);
         }
         else
         {
-            // Hız sıfırsa tamamen dur
             playerRigidbody.velocity = Vector3.zero;
         }
     }
