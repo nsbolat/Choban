@@ -14,9 +14,9 @@ public class BarnMechanic : MonoBehaviour
     public float fadeDuration = 5f;
     public WorldTime.WorldTime worldTime;
 
-    private bool isResting = false;
-    private bool isPlayerInBarn = false;
-    private bool isSheepInBarn = false;
+    [SerializeField] private bool isResting = false;
+    [SerializeField] private bool isPlayerInBarn = false;
+    [SerializeField] private bool isSheepInBarn = false;
 
     private void Start()
     {

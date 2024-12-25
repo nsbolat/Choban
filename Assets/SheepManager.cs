@@ -15,8 +15,8 @@ public class SheepManager : MonoBehaviour
         foreach (Sheep sheep in FindObjectsOfType<Sheep>())
         {
             sheepList.Add(sheep);
-            sheep.MoveToPosition(sheep.transform.position);
         }
+        
     }
 
     void Update()
