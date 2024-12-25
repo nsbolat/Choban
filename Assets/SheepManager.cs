@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI; // UI elemanları için
 using Random = UnityEngine.Random;
 
 public class SheepManager : MonoBehaviour
@@ -10,13 +11,20 @@ public class SheepManager : MonoBehaviour
     [SerializeField] private List<Sheep> sheepList = new List<Sheep>(); // Koyun listesi
     [SerializeField] private LayerMask groundLayer;
 
+    // UI Elements
+    [SerializeField] private RectTransform circleRectTransform; // Daire UI'si için referans
+    [SerializeField] private float sheepRadius = 0.85f; // Koyun başına alan
+
+
     private void Start()
     {
         foreach (Sheep sheep in FindObjectsOfType<Sheep>())
         {
             sheepList.Add(sheep);
         }
-        
+
+        UpdateBaseRadius(); // Başlangıçta base radius hesapla
+        UpdateCircleSize(); // UI dairesini güncelle
     }
 
     void Update()
@@ -35,7 +43,7 @@ public class SheepManager : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
         {
-            // hedefi tıklanan noktaya eşitle
+            // Hedefi tıklanan noktaya eşitle
             target.position = hit.point;
         }
     }
@@ -43,6 +51,9 @@ public class SheepManager : MonoBehaviour
     void ArrangeSheepInCircle()
     {
         if (sheepList.Count == 0) return;
+
+        UpdateBaseRadius(); // Koyun sayısına göre base radius güncelle
+        UpdateCircleSize(); // Daireyi yeniden boyutlandır
 
         for (int i = 0; i < sheepList.Count; i++)
         {
@@ -62,6 +73,44 @@ public class SheepManager : MonoBehaviour
 
             // Koyunu yeni pozisyona yönlendir
             sheepList[i].MoveToPosition(circlePosition);
+        }
+    }
+
+    void UpdateBaseRadius()
+    {
+        // Koyun sayısına göre gereken yarıçapı hesapla
+        baseRadius = Mathf.Sqrt(sheepList.Count) * sheepRadius;
+    }
+
+    void UpdateCircleSize()
+    {
+        if (circleRectTransform != null)
+        {
+            // Dairenin boyutunu, baseRadius'a göre ayarla
+            float diameter = baseRadius * 4f; // Çapı hesapla
+            circleRectTransform.sizeDelta = new Vector2(diameter, diameter); // UI dairesinin boyutunu güncelle
+        }
+    }
+
+    // Koyun eklendiğinde çağrılacak metod
+    public void AddSheep(Sheep newSheep)
+    {
+        if (!sheepList.Contains(newSheep))
+        {
+            sheepList.Add(newSheep);
+            UpdateBaseRadius();
+            UpdateCircleSize();
+        }
+    }
+
+    // Koyun çıkarıldığında çağrılacak metod
+    public void RemoveSheep(Sheep sheepToRemove)
+    {
+        if (sheepList.Contains(sheepToRemove))
+        {
+            sheepList.Remove(sheepToRemove);
+            UpdateBaseRadius();
+            UpdateCircleSize();
         }
     }
 
