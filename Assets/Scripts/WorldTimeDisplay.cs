@@ -6,7 +6,7 @@ using TMPro;
 
 namespace WorldTime
 {
-      [RequireComponent(typeof(TMP_Text))]
+    [RequireComponent(typeof(TMP_Text))]
     public class WorldTimeDisplay : MonoBehaviour
     {
         [SerializeField] private WorldTime _worldTime;
@@ -25,7 +25,14 @@ namespace WorldTime
 
         private void OnWorldTimeChanged(object sender, TimeSpan newTime)
         {
-            _text.SetText(newTime.ToString(@"hh\:mm"));
+            if (_text != null)
+            {
+                _text.SetText(newTime.ToString(@"hh\:mm"));
+            }
+            else
+            {
+                Debug.LogError("TextMeshPro component not found!");
+            }
         }
     }
 }

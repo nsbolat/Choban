@@ -5,17 +5,28 @@ using System;
 
 namespace WorldTime
 {
-
     public class WorldTime : MonoBehaviour
     {
         public event EventHandler<TimeSpan> WorldTimeChanged;
-        [SerializeField] private float _dayLength;
 
-        private TimeSpan _currentTime = TimeSpan.Zero; // Günü 00:00'den başlat
-        private int _currentDay = 1; // Gün sayacı
-        private float _minuteLength => _dayLength / WorldTimeConstans.MinutesInDay;
+        [SerializeField, Tooltip("Bir günün uzunluğu (dakika cinsinden)")]
+        private int _dayLengthInMinutes = 1440; // Varsayılan: 1440 dakika (1 gün)
 
-        public event Action<int> OnDayChanged; // Gün değiştiğinde çağrılacak event
+        [SerializeField, Tooltip("Oyunun başlangıç saati (saat cinsinden)")]
+        private int _startHour = 6; // Varsayılan: 06:00
+
+        private TimeSpan _currentTime = TimeSpan.Zero; 
+        private int _currentDay = 1; 
+
+        private float _minuteLength => (_dayLengthInMinutes * 60f) / WorldTimeConstans.MinutesInDay; // Dakikayı saniyeye çevir
+
+        public event Action<int> OnDayChanged;
+
+        private void Awake()
+        {
+            // Inspector'dan gelen başlangıç saatini TimeSpan'e çevir
+            _currentTime = TimeSpan.FromHours(_startHour);
+        }
 
         private void Start()
         {
@@ -29,8 +40,8 @@ namespace WorldTime
 
             if (_currentTime.TotalMinutes >= WorldTimeConstans.MinutesInDay)
             {
-                _currentTime = TimeSpan.Zero; // Zamanı sıfırla
-                IncrementDay(); // Gün sayısını artır
+                _currentTime = TimeSpan.Zero;
+                IncrementDay();
             }
 
             WorldTimeChanged?.Invoke(this, _currentTime);
@@ -42,7 +53,6 @@ namespace WorldTime
         {
             _currentTime += timeToAdd;
 
-            // Gün değişimini kontrol et
             while (_currentTime.TotalMinutes >= WorldTimeConstans.MinutesInDay)
             {
                 _currentTime = _currentTime.Subtract(TimeSpan.FromMinutes(WorldTimeConstans.MinutesInDay));
@@ -55,7 +65,7 @@ namespace WorldTime
         private void IncrementDay()
         {
             _currentDay++;
-            OnDayChanged?.Invoke(_currentDay); // Gün değişim event'ini çağır
+            OnDayChanged?.Invoke(_currentDay);
             Debug.Log($"New day started! Day: {_currentDay}");
         }
 
@@ -70,3 +80,6 @@ namespace WorldTime
         }
     }
 }
+
+
+
