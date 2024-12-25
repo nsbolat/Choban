@@ -1,33 +1,41 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 public class SheepManager : MonoBehaviour
 {
-    public Transform target; // Takip edilen hedef
-    public float baseRadius = 2f; // Dairenin yarýçapý
-    public List<Sheep> sheepList = new List<Sheep>(); // Koyun listesi
+    [SerializeField] private Transform target; // Takip edilen hedef
+    [SerializeField] private float baseRadius = 2f; // Dairenin yarÄ±Ã§apÄ±
+    [SerializeField] private List<Sheep> sheepList = new List<Sheep>(); // Koyun listesi
+    [SerializeField] private LayerMask groundLayer;
+
+    private void Start()
+    {
+        foreach (Sheep sheep in FindObjectsOfType<Sheep>())
+        {
+            sheepList.Add(sheep);
+            sheep.MoveToPosition(sheep.transform.position);
+        }
+    }
 
     void Update()
     {
-        // Sað týklama yapýldýðýnda hedefi güncelle
-        if (Input.GetMouseButtonDown(1)) // 1: Sað týk
+        // SaÄŸ tÄ±klama yapÄ±nca fonklar Ã§alÄ±ÅŸsÄ±n
+        if (Input.GetMouseButtonDown(1)) // 1: SaÄŸ tÄ±k
         {
             UpdateTargetPosition();
             ArrangeSheepInCircle();
-
         }
-
-        // Koyunlarý daire içinde düzenle
-
     }
 
     void UpdateTargetPosition()
     {
-        // Kameradan bir ray çýkar
+        // Kameradan ray Ã§Ä±kar
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit))
+        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
         {
-            // Hedefi týklanan noktaya taþý
+            // hedefi tÄ±klanan noktaya eÅŸitle
             target.position = hit.point;
         }
     }
@@ -38,22 +46,31 @@ public class SheepManager : MonoBehaviour
 
         for (int i = 0; i < sheepList.Count; i++)
         {
-            // Rastgele bir açý seç
+            // Rastgele bir aÃ§Ä± belirle
             float angle = Random.Range(0f, 360f);
             float angleRad = Mathf.Deg2Rad * angle;
 
-            // Rastgele bir yarýçap seç (0 ile baseRadius arasýnda)
-            float randomRadius = Random.Range(0f, baseRadius);
+            // Rastgele bir yarÄ±Ã§ap belirle (Ã§ember iÃ§inde dÃ¼zgÃ¼n daÄŸÄ±lÄ±m iÃ§in sqrt kullan)
+            float randomRadius = Mathf.Sqrt(Random.Range(0f, 1f)) * baseRadius;
 
-            // Dairenin içindeki rastgele pozisyonu belirle
+            // Ã‡ember iÃ§inde rastgele bir pozisyon hesapla
             Vector3 circlePosition = new Vector3(
                 target.position.x + randomRadius * Mathf.Cos(angleRad),
                 target.position.y,
                 target.position.z + randomRadius * Mathf.Sin(angleRad)
             );
 
-            // Koyunu daire içindeki pozisyona yönlendir
+            // Koyunu yeni pozisyona yÃ¶nlendir
             sheepList[i].MoveToPosition(circlePosition);
+        }
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (target != null)
+        {
+            Gizmos.color = Color.green; // Ã‡emberin rengini belirle
+            Gizmos.DrawWireSphere(target.position, baseRadius); // Ã‡emberi Ã§iz
         }
     }
 }

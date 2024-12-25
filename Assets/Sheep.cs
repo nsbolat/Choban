@@ -1,14 +1,27 @@
+using System;
 using UnityEngine;
 using UnityEngine.AI;
 
 public class Sheep : MonoBehaviour
 {
     private NavMeshAgent navAgent;
+    [SerializeField] private Animator sheepAnim;
 
     void Start()
     {
         navAgent = GetComponent<NavMeshAgent>();
-        navAgent.stoppingDistance = 0.1f; // �ok yak�n bir mesafede durur
+        navAgent.stoppingDistance = 0.1f; // Çok yakın bir mesafede durur
+        
+    }
+
+    private void Update()
+    {
+        // NavMeshAgent'ın hızı Animator'a aktarılır
+        if (sheepAnim != null && navAgent != null)
+        {
+            float currentSpeed = navAgent.velocity.magnitude; // NavMeshAgent'in anlık hızı
+            sheepAnim.SetFloat("Speed", currentSpeed); // Animator'daki Speed parametresini güncelle
+        }
     }
 
     public void MoveToPosition(Vector3 position)
@@ -16,14 +29,6 @@ public class Sheep : MonoBehaviour
         if (navAgent != null)
         {
             navAgent.SetDestination(position);
-
-            // Rotasyonu hedef pozisyona bakacak �ekilde ayarla
-            Vector3 direction = position - transform.position;
-            if (direction.sqrMagnitude > 0.01f)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(direction, Vector3.up);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * 10f);
-            }
         }
     }
 }
