@@ -14,12 +14,15 @@ public class BarnMechanic : MonoBehaviour
     public float fadeDuration = 5f;
     public WorldTime.WorldTime worldTime;
 
-    [SerializeField] private bool isResting = false;
-    [SerializeField] private bool isPlayerInBarn = false;
-    [SerializeField] private bool isSheepInBarn = false;
+    private bool isResting = false;
+    private bool isPlayerInBarn = false;
+    private int sheepInBarnCount = 0;
+    private int totalSheepCount = 0;
+    private int lastRestedDay = -1; // En son dinlenilen günü takip eder (-1: hiç dinlenilmedi)
 
     private void Start()
     {
+        totalSheepCount = GameObject.FindGameObjectsWithTag("Koyun").Length; // Toplam koyun sayısını belirle
         UpdateDayCounter();
         worldTime.OnDayChanged += OnDayChanged; // Gün değişim event'ine abone ol
     }
@@ -38,10 +41,13 @@ public class BarnMechanic : MonoBehaviour
 
         if (other.CompareTag("Koyun"))
         {
-            isSheepInBarn = true;
+            sheepInBarnCount++;
         }
 
-        if (isPlayerInBarn && isSheepInBarn && !isResting)
+        int currentDay = worldTime.GetCurrentDay();
+
+        // Tüm koşullar sağlanıyorsa ve bugünkü dinlenme yapılmadıysa
+        if (isPlayerInBarn && sheepInBarnCount == totalSheepCount && !isResting && lastRestedDay != currentDay)
         {
             StartCoroutine(RestAtBarn());
         }
@@ -49,6 +55,9 @@ public class BarnMechanic : MonoBehaviour
 
     void OnTriggerExit(Collider other)
     {
+        // Eğer dinlenme işlemi devam ediyorsa çıkışları kontrol etme
+        if (isResting) return;
+
         if (other.CompareTag("Köpek"))
         {
             isPlayerInBarn = false;
@@ -56,7 +65,7 @@ public class BarnMechanic : MonoBehaviour
 
         if (other.CompareTag("Koyun"))
         {
-            isSheepInBarn = false;
+            sheepInBarnCount--;
         }
     }
 
@@ -76,6 +85,7 @@ public class BarnMechanic : MonoBehaviour
         statusTextObject.SetActive(false);
 
         worldTime.AddTime(TimeSpan.FromHours(7)); // Zamanı 7 saat ilerlet
+        lastRestedDay = worldTime.GetCurrentDay(); // Bugünkü dinlenme tamamlandı
 
         dayCounterText.gameObject.SetActive(true);
 
@@ -92,4 +102,6 @@ public class BarnMechanic : MonoBehaviour
         dayCounterText.text = "Gün:" + worldTime.GetCurrentDay();
     }
 }
+
+
 

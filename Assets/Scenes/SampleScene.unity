@@ -18079,7 +18079,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c06c10c60890fd4a8d6e341c8d63992, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _dayLength: 24
+  _dayLengthInMinutes: 10
+  _startHour: 6
 --- !u!4 &416384296
 Transform:
   m_ObjectHideFlags: 0
@@ -49488,9 +49489,6 @@ MonoBehaviour:
   dayCounterText: {fileID: 2038837346}
   fadeDuration: 5
   worldTime: {fileID: 416384295}
-  isResting: 0
-  isPlayerInBarn: 0
-  isSheepInBarn: 0
 --- !u!1001 &1215144525
 PrefabInstance:
   m_ObjectHideFlags: 0
