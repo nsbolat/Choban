@@ -12,11 +12,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject _infoObject; // Hedef işareti
     [SerializeField] private AnimationCurve rotationSpeedCurve; // Rotasyon eğrisi
     [SerializeField] private float rotationTime = 1f; // Rotasyon süresi
+    [SerializeField] private float jumpForce = 5f; // Zıplama gücü
+    [SerializeField] private Transform groundCheck; // Zemin kontrol noktası
+    [SerializeField] private float groundCheckRadius = 0.2f; // Zemin kontrol yarıçapı
 
     private Vector3 targetPosition;
     private float currentSpeed = 0f; // Mevcut hız
     private bool isMoving = false;
     private bool isSprinting = false; // Sprint durumu
+    private bool isGrounded = false; // Zeminde olup olmadığını kontrol eder
     private float rotationProgress = 0f; // Rotasyon ilerlemesi
 
     private void Update()
@@ -35,11 +39,19 @@ public class PlayerController : MonoBehaviour
             rotationProgress = 0f; // Hareket bitince rotasyon sıfırlanır
         }
 
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded) // Zıplama
+        {
+            Jump();
+        }
+
         playerAnimator.SetFloat("Speed", currentSpeed); // Animator speed güncelle
+        //playerAnimator.SetBool("isGrounded", isGrounded); // Animator zemin durumu güncelle
     }
 
     private void FixedUpdate()
     {
+        CheckGroundStatus(); // Zemin durumunu kontrol et
+
         if (isMoving)
         {
             MoveTowardsTarget();
@@ -103,7 +115,21 @@ public class PlayerController : MonoBehaviour
         }
         else
         {
-            playerRigidbody.velocity = Vector3.zero;
+            // Hızı sıfırlama, sadece yatay ekseni sıfırla
+            Vector3 velocity = playerRigidbody.velocity;
+            velocity.x = 0f;
+            velocity.z = 0f;
+            playerRigidbody.velocity = velocity;
         }
+    }
+
+    private void Jump()
+    {
+        playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse); // Yukarı doğru kuvvet uygula
+    }
+
+    private void CheckGroundStatus()
+    {
+        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer); // Zemin kontrolü
     }
 }
