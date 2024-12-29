@@ -2,19 +2,24 @@ using UnityEngine;
 
 public class PlayerController : MonoBehaviour
 {
+    [Header("References")]
     [SerializeField] private Rigidbody playerRigidbody; // Oyuncu Rigidbody
     [SerializeField] private Animator playerAnimator; // Animator bileşeni
+    [SerializeField] private Transform groundCheck; // Zemin kontrol noktası
+    [SerializeField] private GameObject _infoObject; // Hedef işareti
+    [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
+    
+    [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
     [SerializeField] private float acceleration = 2f; // Hızlanma
     [SerializeField] private float deceleration = 5f; // Yavaşlama
     [SerializeField] private float sprintMultiplier = 1.5f; // Sprint çarpanı
-    [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
-    [SerializeField] private GameObject _infoObject; // Hedef işareti
     [SerializeField] private AnimationCurve rotationSpeedCurve; // Rotasyon eğrisi
     [SerializeField] private float rotationTime = 1f; // Rotasyon süresi
     [SerializeField] private float jumpForce = 5f; // Zıplama gücü
-    [SerializeField] private Transform groundCheck; // Zemin kontrol noktası
+    [SerializeField] private float gravityScale = 2f; // Yerçekimi çarpanı
     [SerializeField] private float groundCheckRadius = 0.2f; // Zemin kontrol yarıçapı
+    [SerializeField] private float jumpCooldown = 0.5f; // Zıplama cooldown süresi
 
     private Vector3 targetPosition;
     private float currentSpeed = 0f; // Mevcut hız
@@ -22,6 +27,7 @@ public class PlayerController : MonoBehaviour
     private bool isSprinting = false; // Sprint durumu
     private bool isGrounded = false; // Zeminde olup olmadığını kontrol eder
     private float rotationProgress = 0f; // Rotasyon ilerlemesi
+    private float jumpCooldownTimer = 0f; // Zıplama cooldown timer'ı
 
     private void Update()
     {
@@ -39,13 +45,22 @@ public class PlayerController : MonoBehaviour
             rotationProgress = 0f; // Hareket bitince rotasyon sıfırlanır
         }
 
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded) // Zıplama
+        // Zıplama ve cooldown kontrolü
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded && jumpCooldownTimer <= 0f) // Zıplama ve cooldown kontrolü
         {
             Jump();
+            jumpCooldownTimer = jumpCooldown; // Zıplama cooldown'ını başlat
         }
 
-        playerAnimator.SetFloat("Speed", currentSpeed); // Animator speed güncelle
-        //playerAnimator.SetBool("isGrounded", isGrounded); // Animator zemin durumu güncelle
+        // Zıplama cooldown'ını güncelle
+        if (jumpCooldownTimer > 0f)
+        {
+            jumpCooldownTimer -= Time.deltaTime;
+        }
+
+        // Animasyon parametrelerini güncelle
+        playerAnimator.SetFloat("Speed", currentSpeed); 
+        playerAnimator.SetBool("isGrounded", isGrounded);
     }
 
     private void FixedUpdate()
@@ -59,6 +74,12 @@ public class PlayerController : MonoBehaviour
         else
         {
             SlowDown();
+        }
+
+        // Yerçekimi çarpanını uygula
+        if (!isGrounded)
+        {
+            playerRigidbody.AddForce(Vector3.down * gravityScale, ForceMode.Acceleration);
         }
     }
 
@@ -125,11 +146,17 @@ public class PlayerController : MonoBehaviour
 
     private void Jump()
     {
+        playerAnimator.SetTrigger("Jump"); // Zıplama animasyonunu tetikle
         playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse); // Yukarı doğru kuvvet uygula
     }
 
     private void CheckGroundStatus()
     {
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer); // Zemin kontrolü
+
+        if (isGrounded)
+        {
+            playerAnimator.ResetTrigger("Jump"); // Zıplama animasyonunu sıfırla
+        }
     }
 }

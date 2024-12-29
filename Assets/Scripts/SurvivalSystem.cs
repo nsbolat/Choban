@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -7,17 +8,24 @@ public class SurvivalSystem : MonoBehaviour
     [SerializeField] private Slider thirstSlider; 
     [SerializeField] private Slider hungerSlider; 
 
-    private float maxHealth = 100f; 
-    private float maxThirst = 100f; 
-    private float maxHunger = 100f; 
+    [SerializeField]private float maxHealth = 100f; 
+    [SerializeField] private float maxThirst = 100f; 
+    [SerializeField] private float maxHunger = 100f; 
 
-    private float currentHealth;
-    private float currentThirst;
-    private float currentHunger;
+    [SerializeField] private float currentHealth;
+    [SerializeField] private float currentThirst;
+    [SerializeField] private float currentHunger;
 
-    private float thirstDecreaseRate = 10f; 
-    private float hungerDecreaseRate = 15f; 
-    private float healthDecreaseRate = 5f; 
+   [SerializeField] private float thirstDecreaseRate = 10f; 
+   [SerializeField] private float hungerDecreaseRate = 15f; 
+   [SerializeField] private float healthDecreaseRate = 5f;
+
+    private void Awake()
+    {
+        healthSlider= GameObject.Find("sheepHealth").gameObject.GetComponent<Slider>();
+        thirstSlider= GameObject.Find("sheepThirst").gameObject.GetComponent<Slider>();
+        hungerSlider= GameObject.Find("sheepHunger").gameObject.GetComponent<Slider>();
+    }
 
     private void Start()
     {
