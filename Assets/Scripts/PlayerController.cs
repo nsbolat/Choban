@@ -31,17 +31,17 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        isSprinting = Input.GetKey(KeyCode.LeftShift); // Shift'e basılıyken sprint
+        isSprinting = Input.GetKey(KeyCode.LeftShift); // Sprint için
         cursorInfo();
 
         if (Input.GetMouseButton(0)) // Sol tık basılıyken hareket
         {
             RotateTowardsMouse();
-            isMoving = true;
+            isMoving = true; // Hareket etmeye başla
         }
         else
         {
-            isMoving = false;
+            isMoving = false; // Hareket etmeyi durdur
             rotationProgress = 0f; // Hareket bitince rotasyon sıfırlanır
         }
 
@@ -67,13 +67,18 @@ public class PlayerController : MonoBehaviour
     {
         CheckGroundStatus(); // Zemin durumunu kontrol et
 
+        // Eğer hareket ediliyorsa, sadece hareket etmeye başlandıysa yavaşlatma devreye girsin
         if (isMoving)
         {
-            MoveTowardsTarget();
+            MoveTowardsTarget(); // Hareket et
         }
         else
         {
-            SlowDown();
+            // Hareket etmiyor ise, yavaşlatma işlemi yapılmasın
+            if (isGrounded)
+            {
+                SlowDown(); // Yavaşlatma işlemi sadece yerden hareket ediyor iken çalışsın
+            }
         }
 
         // Yerçekimi çarpanını uygula
@@ -86,31 +91,45 @@ public class PlayerController : MonoBehaviour
     private void cursorInfo()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
+        RaycastHit hit;
+
+        // Cast the ray and check if it hits the ground layer
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
         {
-            Vector3 targetPosition = hit.point;
-            _infoObject.transform.position = targetPosition;
+            // Only proceed if the normal of the surface is facing upwards (i.e., it's the top surface)
+            if (Vector3.Dot(hit.normal, Vector3.up) > 0.9f) // Check if the normal is close to the up direction
+            {
+                Vector3 targetPosition = hit.point;
+                _infoObject.transform.position = targetPosition; // Move the cursor info object to the hit position
+            }
         }
     }
 
     private void RotateTowardsMouse()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
+        RaycastHit hit;
+
+        // Cast the ray and check if it hits the ground layer
+        if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
         {
-            targetPosition = hit.point;
-            Vector3 direction = (targetPosition - playerRigidbody.position).normalized;
-            direction.y = 0; // Yalnızca yatay eksende dönüş
-
-            if (direction != Vector3.zero)
+            // Only rotate towards the point if the normal of the surface is facing upwards (top surface)
+            if (Vector3.Dot(hit.normal, Vector3.up) > 0.9f) // Check if the normal is close to the up direction
             {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
+                targetPosition = hit.point;
+                Vector3 direction = (targetPosition - playerRigidbody.position).normalized;
+                direction.y = 0; // Ignore vertical movement for rotation
 
-                // Rotasyon eğrisini uygula
-                rotationProgress = Mathf.Clamp01(rotationProgress + Time.deltaTime / rotationTime);
-                float curveValue = rotationSpeedCurve.Evaluate(rotationProgress);
+                if (direction != Vector3.zero)
+                {
+                    Quaternion targetRotation = Quaternion.LookRotation(direction);
 
-                playerRigidbody.transform.rotation = Quaternion.Slerp(playerRigidbody.transform.rotation, targetRotation, curveValue);
+                    // Apply rotation using the curve value
+                    rotationProgress = Mathf.Clamp01(rotationProgress + Time.deltaTime / rotationTime);
+                    float curveValue = rotationSpeedCurve.Evaluate(rotationProgress);
+
+                    playerRigidbody.transform.rotation = Quaternion.Slerp(playerRigidbody.transform.rotation, targetRotation, curveValue);
+                }
             }
         }
     }
@@ -129,9 +148,10 @@ public class PlayerController : MonoBehaviour
 
     private void SlowDown()
     {
+        // Hız yavaşlatma sadece hareket ederken çalışacak
         if (currentSpeed > 0)
         {
-            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime); // Hız azalt
+            currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime); // Hızı azalt
             playerRigidbody.MovePosition(playerRigidbody.position + playerRigidbody.transform.forward * currentSpeed * Time.fixedDeltaTime);
         }
         else
@@ -147,7 +167,18 @@ public class PlayerController : MonoBehaviour
     private void Jump()
     {
         playerAnimator.SetTrigger("Jump"); // Zıplama animasyonunu tetikle
-        playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse); // Yukarı doğru kuvvet uygula
+
+        // Zıplama kuvveti ve hareket yönü
+        Vector3 forwardMovement = playerRigidbody.transform.forward * 2f; // 2f, ileriye doğru eklenen kuvvetin büyüklüğü, isteğe göre ayarlayın
+
+        // Yukarı doğru zıplama kuvveti ekle
+        playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse); // Yukarı doğru zıplama kuvveti
+
+        // Sadece zıplama sırasında ileriye doğru hareket kuvveti ekle
+        if (isGrounded) // Sadece zıplama yaparken
+        {
+            playerRigidbody.AddForce(forwardMovement, ForceMode.Impulse); // Zıplama sırasında ileri doğru kuvvet uygula
+        }
     }
 
     private void CheckGroundStatus()
