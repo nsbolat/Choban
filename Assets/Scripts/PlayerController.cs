@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerController : MonoBehaviour
 {
@@ -8,7 +9,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck; // Zemin kontrol noktası
     [SerializeField] private GameObject _infoObject; // Hedef işareti
     [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
-    
+
     [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
     [SerializeField] private float acceleration = 2f; // Hızlanma
@@ -28,7 +29,13 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded = false; // Zeminde olup olmadığını kontrol eder
     private float rotationProgress = 0f; // Rotasyon ilerlemesi
     private float jumpCooldownTimer = 0f; // Zıplama cooldown timer'ı
+
     
+
+    private bool isBoneInteracted = false; // Kemik ile etkileşim durumunu takip eder
+    private float boneInteractionTimer = 0f; // Kemik ile etkileşim süresi
+
+
     public static PlayerController Instance { get; private set; } // Singleton
 
     private void Awake()
@@ -70,13 +77,27 @@ public class PlayerController : MonoBehaviour
             jumpCooldownTimer -= Time.deltaTime;
         }
 
-        playerAnimator.SetFloat("Speed", currentSpeed); 
+        playerAnimator.SetFloat("Speed", currentSpeed);
         playerAnimator.SetBool("isGrounded", isGrounded);
+
+
+        // Kemik etkileşimi varsa sprintMultiplier'ı artır
+        if (isBoneInteracted)
+        {
+            boneInteractionTimer -= Time.deltaTime;
+
+            if (boneInteractionTimer <= 0f)
+            {
+                // 5 saniye geçti, etkisini sona erdir
+                sprintMultiplier = 2.2f;
+                isBoneInteracted = false;
+            }
+        }
     }
 
     private void FixedUpdate()
     {
-        CheckGroundStatus(); 
+        CheckGroundStatus();
 
         if (isMoving)
         {
@@ -138,6 +159,8 @@ public class PlayerController : MonoBehaviour
 
         float targetSpeed = maxMoveSpeed * (isSprinting ? sprintMultiplier : 1f);
 
+        
+
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
 
         playerRigidbody.MovePosition(playerRigidbody.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
@@ -182,4 +205,17 @@ public class PlayerController : MonoBehaviour
             playerAnimator.ResetTrigger("Jump");
         }
     }
+
+    // Kemik ile etkileşime girildiğinde çağrılacak metod
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Bone"))
+        {
+            sprintMultiplier = 4.4f; // Sprint hızını 3'e çıkar
+            boneInteractionTimer = 5f; // 5 saniye süresince etki edecek
+            isBoneInteracted = true;
+
+            Destroy(other.gameObject); // Kemik yok edilir
+        }
+    }     
 }
