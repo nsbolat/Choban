@@ -7089,6 +7089,7 @@ MonoBehaviour:
     m_Bits: 264
   circleRectTransform: {fileID: 1872490542}
   sheepRadius: 0.65
+  sheepCountText: {fileID: 0}
 --- !u!114 &1605604710
 MonoBehaviour:
   m_ObjectHideFlags: 0

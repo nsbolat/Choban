@@ -1,22 +1,45 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI; // UI elemanları için
+using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using TMPro;
 
 public class SheepManager : MonoBehaviour
 {
-    [SerializeField] private Transform target; // Takip edilen hedef
-    [SerializeField] private float baseRadius = 2f; // Dairenin yarıçapı
-    [SerializeField] private List<Sheep> sheepList = new List<Sheep>(); // Koyun listesi
-    [SerializeField] private LayerMask groundLayer;
-
-    // UI Elements
+    [Header("References")]
+    [SerializeField] public Transform target; // Takip edilen hedef
     [SerializeField] private RectTransform circleRectTransform; // Daire UI'si için referans
-    [SerializeField] private float sheepRadius = 0.85f; // Koyun başına alan
+    [SerializeField] private LayerMask groundLayer;
     [SerializeField] private TMP_Text sheepCountText;
 
+    [Header("Values")]
+    [SerializeField] private float baseRadius = 2f; // Dairenin yarıçapı
+    [SerializeField] private float sheepRadius = 0.85f; // Koyun başına alan
+    
+    [Header("EscapeSheep")]
+    [SerializeField] private float escapeChance = 20f; // Kaçma olasılığı (0-100 arası)
+    [SerializeField] private float escapeInterval = 5f; // Kaçma sıklığı (saniye cinsinden)
+    
+    [Header("List")]
+    [SerializeField] private List<Sheep> sheepList = new List<Sheep>(); // Sürüdeki koyunlar
+    [SerializeField] private List<Sheep> escapedSheepList = new List<Sheep>(); // Kaçan koyunlar
+
+    
+
+    public static SheepManager Instance { get; private set; } // Singleton
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+    }
 
     private void Start()
     {
@@ -26,42 +49,49 @@ public class SheepManager : MonoBehaviour
         }
 
         UpdateSheepCountUI();
-        UpdateBaseRadius(); // Başlangıçta base radius hesapla
-        UpdateCircleSize(); // UI dairesini güncelle
+        UpdateBaseRadius();
+        UpdateCircleSize();
+        ArrangeSheepInCircle();
+
+        // Kaçma kontrolünü belirli bir sıklıkla çağır
+        InvokeRepeating(nameof(CheckForEscape), escapeInterval, escapeInterval); // Her 'escapeInterval' saniyede bir kontrol et
     }
 
-    void Update()
+    private void Update()
     {
-        // Sağ tıklama yapınca fonklar çalışsın
-        if (Input.GetMouseButtonDown(1)) // 1: Sağ tık
+        HandleRightClickTargetChange();
+       // UpdateSheepFollowTarget();
+    }
+    
+    private void HandleRightClickTargetChange()
+    {
+        if (Input.GetMouseButtonDown(1)) // Sağ tık kontrolü
         {
-            UpdateTargetPosition();
-            ArrangeSheepInCircle();
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+
+            if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
+            {
+                if (target != null)
+                {
+                    target.position = hit.point; // Hedef pozisyonunu güncelle
+                    ArrangeSheepInCircle(); // Koyunları yeni pozisyonlara yerleştir
+                }
+            }
         }
     }
-
-    void UpdateTargetPosition()
-    {
-        // Kameradan ray çıkar
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        if (Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, groundLayer))
-        {
-            // Hedefi tıklanan noktaya eşitle
-            target.position = hit.point;
-        }
-    }
-
-    void ArrangeSheepInCircle()
+    private void ArrangeSheepInCircle()
     {
         if (sheepList.Count == 0) return;
 
         UpdateBaseRadius(); // Koyun sayısına göre base radius güncelle
         UpdateCircleSize(); // Daireyi yeniden boyutlandır
 
+        // Çevreyi 360 derece olarak kabul ederek her koyun için bir açı hesapla
         for (int i = 0; i < sheepList.Count; i++)
         {
-            // Rastgele bir açı belirle
-            float angle = Random.Range(0f, 360f);
+            // Koyunun her biri için rastgele bir açı belirle
+            float angle = (360f / sheepList.Count) * i; // Her koyunun farklı bir açısı olacak
             float angleRad = Mathf.Deg2Rad * angle;
 
             // Rastgele bir yarıçap belirle (çember içinde düzgün dağılım için sqrt kullan)
@@ -75,39 +105,55 @@ public class SheepManager : MonoBehaviour
             );
 
             // Koyunu yeni pozisyona yönlendir
-            sheepList[i].MoveToPosition(circlePosition);
+            sheepList[i].FollowTarget(circlePosition); // Koyunun hedefini yeni konuma ayarla
         }
     }
-
-    void UpdateBaseRadius()
+    private void CheckForEscape()
     {
-        // Koyun sayısına göre gereken yarıçapı hesapla
-        baseRadius = Mathf.Sqrt(sheepList.Count) * sheepRadius;
-    }
-
-    void UpdateCircleSize()
-    {
-        if (circleRectTransform != null)
+        if (sheepList.Count > 0 && Random.Range(0f, 100f) < escapeChance) // escapeChance ile kaçma olasılığını kontrol et
         {
-            // Dairenin boyutunu, baseRadius'a göre ayarla
-            float diameter = baseRadius * 4f; // Çapı hesapla
-            circleRectTransform.sizeDelta = new Vector2(diameter, diameter); // UI dairesinin boyutunu güncelle
+            Sheep escapingSheep = sheepList[Random.Range(0, sheepList.Count)];
+            RemoveSheep(escapingSheep);
+
+            Vector3 escapePosition = new Vector3(
+                target.position.x + Random.Range(20f, 50f),
+                target.position.y,
+                target.position.z + Random.Range(20f, 50f)
+            );
+
+            escapingSheep.Escape(escapePosition);
+            escapedSheepList.Add(escapingSheep);
+            Debug.Log("Bir koyun kaçtı!");
         }
     }
 
-    // Koyun eklendiğinde çağrılacak metod
-    public void AddSheep(Sheep newSheep)
+public void AddSheep(Sheep newSheep)
+{
+    if (!sheepList.Contains(newSheep))
     {
-        if (!sheepList.Contains(newSheep))
+        sheepList.Add(newSheep);
+        if (escapedSheepList.Contains(newSheep))
         {
-            sheepList.Add(newSheep);
-            UpdateBaseRadius();
-            UpdateCircleSize();
-            UpdateSheepCountUI();
+            escapedSheepList.Remove(newSheep);
         }
-    }
 
-    // Koyun çıkarıldığında çağrılacak metod
+        // Koyun tekrar sürüye katıldığında sadece yeni koyunun rastgele bir pozisyona yerleşmesini sağla
+        // Kaçan koyun için ArrangeSheepInCircle fonksiyonunu çağır
+        if (escapedSheepList.Contains(newSheep))
+        {
+            Vector3 escapePosition = new Vector3(
+                target.position.x + Random.Range(20f, 50f),
+                target.position.y,
+                target.position.z + Random.Range(20f, 50f)
+            );
+
+            newSheep.FollowTarget(escapePosition); // Kaçan koyun hedefi yeni pozisyona ayarla
+        }
+
+        UpdateSheepCountUI();
+    }
+}
+
     public void RemoveSheep(Sheep sheepToRemove)
     {
         if (sheepList.Contains(sheepToRemove))
@@ -119,15 +165,6 @@ public class SheepManager : MonoBehaviour
         }
     }
 
-    private void OnDrawGizmos()
-    {
-        if (target != null)
-        {
-            Gizmos.color = Color.green; // Çemberin rengini belirle
-            Gizmos.DrawWireSphere(target.position, baseRadius); // Çemberi çiz
-        }
-    }
-
     private void UpdateSheepCountUI()
     {
         if (sheepCountText != null)
@@ -135,4 +172,19 @@ public class SheepManager : MonoBehaviour
             sheepCountText.text = "Koyun Sayısı: " + sheepList.Count;
         }
     }
+
+    void UpdateCircleSize()
+    {
+        if (circleRectTransform != null)
+        {
+            float diameter = baseRadius * 4f;
+            circleRectTransform.sizeDelta = new Vector2(diameter, diameter);
+        }
+    }
+
+    void UpdateBaseRadius()
+    {
+        baseRadius = Mathf.Sqrt(sheepList.Count) * sheepRadius;
+    }
+    
 }

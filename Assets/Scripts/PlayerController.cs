@@ -28,6 +28,20 @@ public class PlayerController : MonoBehaviour
     private bool isGrounded = false; // Zeminde olup olmadığını kontrol eder
     private float rotationProgress = 0f; // Rotasyon ilerlemesi
     private float jumpCooldownTimer = 0f; // Zıplama cooldown timer'ı
+    
+    public static PlayerController Instance { get; private set; } // Singleton
+
+    private void Awake()
+    {
+        if (Instance == null)
+        {
+            Instance = this; // Instance bu scriptin ilk oluşturulan örneği olur
+        }
+        else
+        {
+            Destroy(gameObject); // Eğer zaten bir Instance varsa, yenisini yok ederiz
+        }
+    }
 
     private void Update()
     {
