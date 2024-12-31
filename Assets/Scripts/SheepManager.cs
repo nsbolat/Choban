@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI; // UI elemanları için
 using Random = UnityEngine.Random;
+using TMPro;
 
 public class SheepManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class SheepManager : MonoBehaviour
     // UI Elements
     [SerializeField] private RectTransform circleRectTransform; // Daire UI'si için referans
     [SerializeField] private float sheepRadius = 0.85f; // Koyun başına alan
+    [SerializeField] private TMP_Text sheepCountText;
 
 
     private void Start()
@@ -23,6 +25,7 @@ public class SheepManager : MonoBehaviour
             sheepList.Add(sheep);
         }
 
+        UpdateSheepCountUI();
         UpdateBaseRadius(); // Başlangıçta base radius hesapla
         UpdateCircleSize(); // UI dairesini güncelle
     }
@@ -100,6 +103,7 @@ public class SheepManager : MonoBehaviour
             sheepList.Add(newSheep);
             UpdateBaseRadius();
             UpdateCircleSize();
+            UpdateSheepCountUI();
         }
     }
 
@@ -111,6 +115,7 @@ public class SheepManager : MonoBehaviour
             sheepList.Remove(sheepToRemove);
             UpdateBaseRadius();
             UpdateCircleSize();
+            UpdateSheepCountUI();
         }
     }
 
@@ -120,6 +125,14 @@ public class SheepManager : MonoBehaviour
         {
             Gizmos.color = Color.green; // Çemberin rengini belirle
             Gizmos.DrawWireSphere(target.position, baseRadius); // Çemberi çiz
+        }
+    }
+
+    private void UpdateSheepCountUI()
+    {
+        if (sheepCountText != null)
+        {
+            sheepCountText.text = "Koyun Sayısı: " + sheepList.Count;
         }
     }
 }
