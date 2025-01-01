@@ -71,4 +71,16 @@ public class SurvivalSystem : MonoBehaviour
         thirstSlider.value = currentThirst / maxThirst; 
         hungerSlider.value = currentHunger / maxHunger; 
     }
+    public void TakeDamage(float damage)
+    {
+        currentHealth -= damage; // Sağlığı azalt
+        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Sağlığı sınırla
+
+        UpdateSliders(); // UI güncelle
+
+        if (currentHealth <= 0)
+        {
+            Debug.Log("Sürü öldü!"); // Sağlık sıfırlandığında işlem yapılabilir
+        }
+    }
 }

@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: KopekAgiz
+  m_Mask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: Armature
+    m_Weight: 0
+  - m_Path: Armature/Root
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/kuyruk1
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/kuyruk1/kuyruk2
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/kuyruk1/kuyruk2/kuyruk3
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/kuyruk1/kuyruk2/kuyruk3/kuyruk4
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/kuyruk1/kuyruk2/kuyruk3/kuyruk4/kuyruk4_end
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/pelvis.L
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/pelvis.L/pelvis.L_end
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/pelvis.R
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/pelvis.R/pelvis.R_end
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.L
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.L/shin.L
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.L/shin.L/foot.L
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.L/shin.L/foot.L/toe.L
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.L/shin.L/foot.L/toe.L/toe.L_end
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.R
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.R/shin.R
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.R/shin.R/foot.R
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.R/shin.R/foot.R/toe.R
+    m_Weight: 0
+  - m_Path: Armature/Root/arkaBel/thigh.R/shin.R/foot.R/toe.R/toe.R_end
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.L
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.L/front_thigh.L
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.L/front_thigh.L/front_shin.L
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.L/front_thigh.L/front_shin.L/front_foot.L
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.L/front_thigh.L/front_shin.L/front_foot.L/front_toe.L
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.L/front_thigh.L/front_shin.L/front_foot.L/front_toe.L/front_toe.L_end
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.R
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.R/front_thigh.R
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.R/front_thigh.R/front_shin.R
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.R/front_thigh.R/front_shin.R/front_foot.R
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.R/front_thigh.R/front_shin.R/front_foot.R/front_toe.R
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/shoulder.R/front_thigh.R/front_shin.R/front_foot.R/front_toe.R/front_toe.R_end
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009
+    m_Weight: 0
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/altCene
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/altCene/altCene_end
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_L
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_L/ear2_L
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_L/ear2_L/ear3_L
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_L/ear2_L/ear3_L/ear3_L_end
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_R
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_R/ear2_R
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_R/ear2_R/ear3_R
+    m_Weight: 1
+  - m_Path: Armature/Root/onBel/spine.007/spine.008/spine.009/boyun/ustCene/ear1_R/ear2_R/ear3_R/ear3_R_end
+    m_Weight: 1
+  - m_Path: it
+    m_Weight: 0

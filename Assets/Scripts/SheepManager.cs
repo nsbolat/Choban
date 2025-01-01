@@ -25,8 +25,6 @@ public class SheepManager : MonoBehaviour
     [SerializeField] private List<Sheep> sheepList = new List<Sheep>(); // Sürüdeki koyunlar
     [SerializeField] private List<Sheep> escapedSheepList = new List<Sheep>(); // Kaçan koyunlar
 
-    
-
     public static SheepManager Instance { get; private set; } // Singleton
 
     private void Awake()
@@ -55,12 +53,15 @@ public class SheepManager : MonoBehaviour
 
         // Kaçma kontrolünü belirli bir sıklıkla çağır
         InvokeRepeating(nameof(CheckForEscape), escapeInterval, escapeInterval); // Her 'escapeInterval' saniyede bir kontrol et
+        if (WolfSpawner.Instance != null)
+        {
+            WolfSpawner.Instance.SetFlockTarget(target);
+        }
     }
 
     private void Update()
     {
         HandleRightClickTargetChange();
-       // UpdateSheepFollowTarget();
     }
     
     private void HandleRightClickTargetChange()
@@ -80,6 +81,7 @@ public class SheepManager : MonoBehaviour
             }
         }
     }
+
     private void ArrangeSheepInCircle()
     {
         if (sheepList.Count == 0) return;
@@ -108,6 +110,7 @@ public class SheepManager : MonoBehaviour
             sheepList[i].FollowTarget(circlePosition); // Koyunun hedefini yeni konuma ayarla
         }
     }
+
     private void CheckForEscape()
     {
         if (sheepList.Count > 0 && Random.Range(0f, 100f) < escapeChance) // escapeChance ile kaçma olasılığını kontrol et
@@ -127,32 +130,32 @@ public class SheepManager : MonoBehaviour
         }
     }
 
-public void AddSheep(Sheep newSheep)
-{
-    if (!sheepList.Contains(newSheep))
+    public void AddSheep(Sheep newSheep)
     {
-        sheepList.Add(newSheep);
-        if (escapedSheepList.Contains(newSheep))
+        if (!sheepList.Contains(newSheep))
         {
-            escapedSheepList.Remove(newSheep);
+            sheepList.Add(newSheep);
+            if (escapedSheepList.Contains(newSheep))
+            {
+                escapedSheepList.Remove(newSheep);
+            }
+
+            // Koyun tekrar sürüye katıldığında sadece yeni koyunun rastgele bir pozisyona yerleşmesini sağla
+            // Kaçan koyun için ArrangeSheepInCircle fonksiyonunu çağır
+            if (escapedSheepList.Contains(newSheep))
+            {
+                Vector3 escapePosition = new Vector3(
+                    target.position.x + Random.Range(20f, 50f),
+                    target.position.y,
+                    target.position.z + Random.Range(20f, 50f)
+                );
+
+                newSheep.FollowTarget(escapePosition); // Kaçan koyun hedefi yeni pozisyona ayarla
+            }
+
+            UpdateSheepCountUI();
         }
-
-        // Koyun tekrar sürüye katıldığında sadece yeni koyunun rastgele bir pozisyona yerleşmesini sağla
-        // Kaçan koyun için ArrangeSheepInCircle fonksiyonunu çağır
-        if (escapedSheepList.Contains(newSheep))
-        {
-            Vector3 escapePosition = new Vector3(
-                target.position.x + Random.Range(20f, 50f),
-                target.position.y,
-                target.position.z + Random.Range(20f, 50f)
-            );
-
-            newSheep.FollowTarget(escapePosition); // Kaçan koyun hedefi yeni pozisyona ayarla
-        }
-
-        UpdateSheepCountUI();
     }
-}
 
     public void RemoveSheep(Sheep sheepToRemove)
     {
@@ -186,5 +189,15 @@ public void AddSheep(Sheep newSheep)
     {
         baseRadius = Mathf.Sqrt(sheepList.Count) * sheepRadius;
     }
-    
+    public void DecreaseSheepCount()
+    {
+        if (sheepList.Count > 0)
+        {
+            Sheep sheepToRemove = sheepList[0]; // İlk koyunu al (saldırıya uğrayan)
+            sheepList.Remove(sheepToRemove); // Koyunu listeden çıkar
+            UpdateSheepCountUI(); // UI'yi güncelle
+            Destroy(sheepToRemove.gameObject); // Koyunu yok et
+            Debug.Log("Bir koyun öldü! Koyun sayısı: " + sheepList.Count);
+        }
+    }
 }
