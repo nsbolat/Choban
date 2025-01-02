@@ -1421,7 +1421,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 0
+  m_Constraints: 126
   m_CollisionDetection: 0
 --- !u!144 &9004957251334210909
 CharacterJoint:
@@ -2570,7 +2570,7 @@ MonoBehaviour:
   wolfAnim: {fileID: 0}
   flockCenter: {fileID: 0}
   attackRange: 1.5
-  attackInterval: 2
+  attackInterval: 0.1
   damagePerAttack: 10
   spawnPoint: {fileID: 0}
   deathSheep: {fileID: 8215897701034637954}
@@ -2586,7 +2586,7 @@ NavMeshAgent:
   m_Radius: 0.25
   m_Speed: 7
   m_Acceleration: 16
-  avoidancePriority: 50
+  avoidancePriority: 0
   m_AngularSpeed: 1000
   m_StoppingDistance: 1
   m_AutoTraverseOffMeshLink: 1
@@ -3259,7 +3259,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 126
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!1 &4290466805002945641
 GameObject:
@@ -5070,7 +5070,7 @@ GameObject:
   m_Component:
   - component: {fileID: 422253229889862719}
   m_Layer: 0
-  m_Name: sheep
+  m_Name: DeathSheep
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5084,15 +5084,15 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8215897701034637954}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.23469427, y: 0.581515, z: -0.180087, w: 0.7578441}
-  m_LocalPosition: {x: -0.00443, y: -0.00513, z: 0.00559}
+  m_LocalRotation: {x: -0.20918034, y: 0.6754586, z: -0.20918049, w: 0.6754574}
+  m_LocalPosition: {x: -0.00465, y: -0.00442, z: 0.00709}
   m_LocalScale: {x: 0.007948023, y: 0.007947971, z: 0.007948016}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1305036686873837877}
   - {fileID: 6973118714681140038}
   m_Father: {fileID: 6937441300678215034}
-  m_LocalEulerAnglesHint: {x: -8.411, y: 77.535, z: -33.494}
+  m_LocalEulerAnglesHint: {x: 0, y: 90, z: -34.414}
 --- !u!1 &8367845031822056062
 GameObject:
   m_ObjectHideFlags: 0

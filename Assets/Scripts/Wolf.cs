@@ -52,46 +52,65 @@ public class Wolf : MonoBehaviour
     {
         if (isEscaping) return; // Kaçıyorsa başka bir işlem yapma
 
+        // Her frame'de en yakın koyunu tekrar kontrol et ve flockCenter'ı sürekli güncelle
+        flockCenter = GetClosestSheep();
+
+        // Eğer flockCenter hala null ise kaçışa başla
         if (flockCenter == null)
         {
             EscapeAfterAttack();
             return; // Kaçışa başladıktan sonra diğer işlemleri yapma
         }
 
-        if (flockCenter != null)
-        {
-            navAgent.SetDestination(flockCenter.position);
-            navAgent.speed = 3f;
-            float distanceToFlock = Vector3.Distance(transform.position, flockCenter.position);
+        // NavMeshAgent ile koyuna doğru hedef belirle
+        navAgent.SetDestination(flockCenter.position);
+        navAgent.speed = 5.5f;
 
-            if (distanceToFlock <= attackRange)
+        // Koyuna olan mesafeyi hesapla
+        float distanceToFlock = Vector3.Distance(transform.position, flockCenter.position);
+
+        // Koyuna yeterince yaklaşıldığında saldırı başlat
+        if (distanceToFlock <= attackRange)
+        {
+            if (attackCooldown <= 0f)
             {
                 isAttacking = true;
-
-                if (attackCooldown <= 0f)
-                {
-                    AttackFlock();
-                    deathSheep.gameObject.SetActive(true);
-                    attackCooldown = attackInterval;
-                }
+                AttackFlock();  // Saldırıyı başlat
+                deathSheep.gameObject.SetActive(true);
+                attackCooldown = attackInterval; // Saldırılar arasındaki bekleme süresi
             }
-            else
-            {
-                isAttacking = false;
-            }
+        }
+        else
+        {
+            isAttacking = false; // Saldırmıyor
+        }
 
-            attackCooldown -= Time.deltaTime;
-
-            // If player is within 5 units, press Q to escape to spawn
-            if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) <= 5f)
+        // Saldırı bekleme süresini güncelle
+        attackCooldown -= Time.deltaTime;
+        
+        if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) <= 5f)
+        {
+            if (Input.GetKeyDown(KeyCode.Q)) // "Q" tuşuna basıldı mı?
             {
-                if (Input.GetKeyDown(KeyCode.Q)) // "Q" key to escape
-                {
-                    EscapeToSpawnPoint();
-                }
+                EscapeToSpawnPoint();
             }
         }
     }
+
+    private void AttackFlock()
+    {
+        Debug.Log("Kurt saldırıyor!");
+
+        // Koyun sayısını azalt
+        if (SheepManager.Instance != null)
+        {
+            SheepManager.Instance.DecreaseSheepCount();
+        }
+
+        // Saldırdıktan sonra kaçışa başla
+        EscapeAfterAttack();
+    }
+
 
     private Transform GetClosestSheep()
     {
@@ -111,22 +130,10 @@ public class Wolf : MonoBehaviour
         return closestSheep;
     }
 
-    private void AttackFlock()
-    {
-        Debug.Log("Kurt saldırıyor!");
-
-        if (SheepManager.Instance != null)
-        {
-            SheepManager.Instance.DecreaseSheepCount();
-        }
-
-        EscapeAfterAttack();
-    }
-
     private void EscapeAfterAttack()
     {
         isEscaping = true;
-        navAgent.speed = 8f;
+        navAgent.speed = 10f;
         Vector3 randomEscapePosition = new Vector3(
             transform.position.x + Random.Range(20f, 50f),
             transform.position.y,
@@ -140,7 +147,7 @@ public class Wolf : MonoBehaviour
     private void EscapeToSpawnPoint()
     {
         isEscaping = true;
-        navAgent.speed = 8f;
+        navAgent.speed = 10f;
         navAgent.SetDestination(initialSpawnPosition); // Go back to the spawn point
         Debug.Log("Kurt kaçarken spawn noktasına dönüyor.");
         StartCoroutine(DestroyAfterEscape()); // Destroy after reaching spawn point
