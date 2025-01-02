@@ -11,6 +11,7 @@ public class WolfSpawner : MonoBehaviour
     [SerializeField] private GameObject wolfPrefab;
     [SerializeField] public Transform spawnPoint;
     [SerializeField] private float spawnInterval = 10f; // Kurt oluşturma sıklığı
+    
 
     private void Awake()
     {
@@ -47,13 +48,7 @@ public class WolfSpawner : MonoBehaviour
 
             GameObject newWolf = Instantiate(wolfPrefab, randomSpawnPosition, Quaternion.identity);
             Wolf wolf = newWolf.GetComponent<Wolf>();
-
-            if (wolf != null && flockCenter != null)
-            {
-                // Kurtun sürü hedefini ayarla
-                wolf.SetFlockCenter(flockCenter);
-                Debug.Log("Yeni bir kurt oluşturuldu.");
-            }
+            
         }
     }
 }

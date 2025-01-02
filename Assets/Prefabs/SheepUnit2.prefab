@@ -2173,6 +2173,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sheepAnim: {fileID: 4176778102823269427}
+  _playerAnim: {fileID: 0}
+  isEscaped: 0
 --- !u!54 &3810695847765770441
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -2182,7 +2184,7 @@ Rigidbody:
   m_GameObject: {fileID: 7827358015725604760}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
+  m_Drag: 0.4
   m_AngularDrag: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}

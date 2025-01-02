@@ -8,6 +8,7 @@ TagManager:
   - "K\xF6pek"
   - Koyun
   - Bone
+  - Wolf
   layers:
   - Default
   - TransparentFX
@@ -18,7 +19,7 @@ TagManager:
   - Koyun
   - Player
   - Ground/Sand
-  - 
+  - Wolf
   - 
   - 
   - 

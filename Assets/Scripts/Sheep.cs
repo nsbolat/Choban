@@ -6,12 +6,14 @@ public class Sheep : MonoBehaviour
 {
     private NavMeshAgent navAgent;
     [SerializeField] private Animator sheepAnim;
-    [SerializeField] private bool isEscaped = false;// Koyunun kaçıp kaçmadığını kontrol eder
+    [SerializeField] private Animator _playerAnim;
+    [SerializeField] public bool isEscaped = false;// Koyunun kaçıp kaçmadığını kontrol eder
 
 
     void Start()
     {
         navAgent = GetComponent<NavMeshAgent>();
+        _playerAnim = GameObject.FindWithTag("Köpek").GetComponent<Animator>();
         navAgent.stoppingDistance = 0.1f;
     }
 

@@ -22,7 +22,7 @@ public class SheepManager : MonoBehaviour
     [SerializeField] private float escapeInterval = 5f; // Kaçma sıklığı (saniye cinsinden)
     
     [Header("List")]
-    [SerializeField] private List<Sheep> sheepList = new List<Sheep>(); // Sürüdeki koyunlar
+    [SerializeField] public List<Sheep> sheepList = new List<Sheep>(); // Sürüdeki koyunlar
     [SerializeField] private List<Sheep> escapedSheepList = new List<Sheep>(); // Kaçan koyunlar
 
     public static SheepManager Instance { get; private set; } // Singleton
