@@ -17,7 +17,7 @@ public class Sheep : MonoBehaviour
         navAgent.stoppingDistance = 0.1f;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (sheepAnim != null && navAgent != null)
         {

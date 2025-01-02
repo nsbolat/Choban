@@ -985,12 +985,12 @@ MonoBehaviour:
   meeleSounds:
   - {fileID: 8300000, guid: 9d32dab57a68f7040b3935d9d678b1eb, type: 3}
   - {fileID: 8300000, guid: 9256e5aabd556f641aede0691e9bde87, type: 3}
-  minFootStepInterval: 0.4
-  maxFootStepInterval: 0.8
+  minFootStepInterval: 0.2
+  maxFootStepInterval: 0.4
   minMeleeInterval: 0
-  maxMeleeInterval: 50
-  minVolume: 0.6
-  maxVolume: 1
+  maxMeleeInterval: 100
+  minVolume: 0.2
+  maxVolume: 0.4
 --- !u!1 &3171995556224004002
 GameObject:
   m_ObjectHideFlags: 0
@@ -2066,7 +2066,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
-  m_Volume: 1
+  m_Volume: 0.5
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -2349,7 +2349,6 @@ GameObject:
   m_Component:
   - component: {fileID: 3288748682103890720}
   - component: {fileID: 1620475574139291114}
-  - component: {fileID: 4686171237646269387}
   - component: {fileID: 8548603596341710022}
   - component: {fileID: 2909669825721589550}
   - component: {fileID: 3810695847765770441}
@@ -2387,48 +2386,6 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7827358015725604760}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &4686171237646269387
-MeshRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7827358015725604760}
-  m_Enabled: 0
-  m_CastShadows: 1
-  m_ReceiveShadows: 1
-  m_DynamicOccludee: 1
-  m_StaticShadowCaster: 0
-  m_MotionVectors: 1
-  m_LightProbeUsage: 1
-  m_ReflectionProbeUsage: 1
-  m_RayTracingMode: 2
-  m_RayTraceProcedural: 0
-  m_RenderingLayerMask: 1
-  m_RendererPriority: 0
-  m_Materials:
-  - {fileID: 2100000, guid: 31321ba15b8f8eb4c954353edc038b1d, type: 2}
-  m_StaticBatchInfo:
-    firstSubMesh: 0
-    subMeshCount: 0
-  m_StaticBatchRoot: {fileID: 0}
-  m_ProbeAnchor: {fileID: 0}
-  m_LightProbeVolumeOverride: {fileID: 0}
-  m_ScaleInLightmap: 1
-  m_ReceiveGI: 1
-  m_PreserveUVs: 0
-  m_IgnoreNormalsForChartDetection: 0
-  m_ImportantGI: 0
-  m_StitchLightmapSeams: 1
-  m_SelectedEditorRenderState: 3
-  m_MinimumChartSize: 4
-  m_AutoUVMaxDistance: 0.5
-  m_AutoUVMaxAngle: 89
-  m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_AdditionalVertexStreams: {fileID: 0}
 --- !u!136 &8548603596341710022
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -2491,9 +2448,9 @@ Rigidbody:
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
-  m_Interpolate: 2
+  m_Interpolate: 0
   m_Constraints: 112
-  m_CollisionDetection: 2
+  m_CollisionDetection: 0
 --- !u!195 &2317175462981193290
 NavMeshAgent:
   m_ObjectHideFlags: 0
