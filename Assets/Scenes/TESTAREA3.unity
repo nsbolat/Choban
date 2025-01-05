@@ -5973,7 +5973,7 @@ MonoBehaviour:
   wolfPrefab: {fileID: 3239667933391550591, guid: 784340d4b6b098b4aa311972e0553760,
     type: 3}
   spawnPoint: {fileID: 1286010960}
-  spawnInterval: 5
+  spawnInterval: 10
 --- !u!4 &1321201937
 Transform:
   m_ObjectHideFlags: 0
@@ -8496,7 +8496,7 @@ MonoBehaviour:
   m_Follow: {fileID: 1105603399}
   m_Lens:
     FieldOfView: 53.130104
-    OrthographicSize: 5.000002
+    OrthographicSize: 5
     NearClipPlane: -50
     FarClipPlane: 1000
     Dutch: 0

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using System.Collections;
 
@@ -9,6 +10,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheck; // Zemin kontrol noktası
     [SerializeField] private GameObject _infoObject; // Hedef işareti
     [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
+    [SerializeField] private GameObject kemik; // Zemin Layer'ı
+
 
     [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
@@ -50,6 +53,11 @@ public class PlayerController : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        kemik.SetActive(false);
+    }
+
     private void Update()
     {
         isSprinting = Input.GetKey(KeyCode.LeftShift); // Sprint için
@@ -85,12 +93,15 @@ public class PlayerController : MonoBehaviour
         if (isBoneInteracted)
         {
             boneInteractionTimer -= Time.deltaTime;
+            kemik.SetActive(true);
 
             if (boneInteractionTimer <= 0f)
             {
                 // 5 saniye geçti, etkisini sona erdir
                 sprintMultiplier = 2.2f;
                 isBoneInteracted = false;
+                kemik.SetActive(false);
+
             }
         }
     }
