@@ -25,6 +25,11 @@ public class SheepManager : MonoBehaviour
     [SerializeField] public List<Sheep> sheepList = new List<Sheep>(); // Sürüdeki koyunlar
     [SerializeField] private List<Sheep> escapedSheepList = new List<Sheep>(); // Kaçan koyunlar
 
+
+    //UI
+    [SerializeField] private GameObject gameOverPanel;
+
+
     public static SheepManager Instance { get; private set; } // Singleton
 
     private void Awake()
@@ -41,6 +46,8 @@ public class SheepManager : MonoBehaviour
 
     private void Start()
     {
+        gameOverPanel.SetActive(false);
+
         foreach (Sheep sheep in FindObjectsOfType<Sheep>())
         {
             sheepList.Add(sheep);
@@ -174,6 +181,15 @@ public class SheepManager : MonoBehaviour
         {
             sheepCountText.text = "Koyun Sayısı: " + sheepList.Count;
         }
+
+
+        if (sheepList.Count == 0)
+        {
+            gameOverPanel.SetActive(true); 
+            Debug.Log("Oyun Bitti! Tüm koyunlar kaybedildi.");
+        }
+
+
     }
 
     void UpdateCircleSize()

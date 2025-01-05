@@ -1,36 +1,39 @@
-using System;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class SurvivalSystem : MonoBehaviour
 {
-    [SerializeField] private Slider healthSlider; 
-    [SerializeField] private Slider thirstSlider; 
-    [SerializeField] private Slider hungerSlider; 
+    [SerializeField] private Slider thirstSlider;
+    [SerializeField] private Slider hungerSlider;
 
-    [SerializeField]private float maxHealth = 100f; 
-    [SerializeField] private float maxThirst = 100f; 
-    [SerializeField] private float maxHunger = 100f; 
+    [SerializeField] private TextMeshProUGUI thirstText;
+    [SerializeField] private TextMeshProUGUI hungerText;
 
-    [SerializeField] private float currentHealth;
+    [SerializeField] private float maxThirst = 100f;
+    [SerializeField] private float maxHunger = 100f;
+
     [SerializeField] private float currentThirst;
     [SerializeField] private float currentHunger;
 
-   [SerializeField] private float thirstDecreaseRate = 10f; 
-   [SerializeField] private float hungerDecreaseRate = 15f; 
-   [SerializeField] private float healthDecreaseRate = 5f;
+    [SerializeField] private float thirstDecreaseRate = 10f;
+    [SerializeField] private float hungerDecreaseRate = 15f;
+
+    [SerializeField] private float sheepReductionInterval = 5f; // 5 saniye
+    private float thirstReductionTimer = 0f;
+    private float hungerReductionTimer = 0f;
 
     private void Awake()
     {
-        healthSlider= GameObject.Find("sheepHealth").gameObject.GetComponent<Slider>();
-        thirstSlider= GameObject.Find("sheepThirst").gameObject.GetComponent<Slider>();
-        hungerSlider= GameObject.Find("sheepHunger").gameObject.GetComponent<Slider>();
+        thirstSlider = GameObject.Find("sheepThirst").GetComponent<Slider>();
+        hungerSlider = GameObject.Find("sheepHunger").GetComponent<Slider>();
+
+        thirstText = GameObject.Find("ThirstText").GetComponent<TextMeshProUGUI>();
+        hungerText = GameObject.Find("HungerText").GetComponent<TextMeshProUGUI>();
     }
 
     private void Start()
     {
-        
-        currentHealth = maxHealth;
         currentThirst = maxThirst;
         currentHunger = maxHunger;
 
@@ -39,48 +42,51 @@ public class SurvivalSystem : MonoBehaviour
 
     private void Update()
     {
-        
         currentThirst -= thirstDecreaseRate * Time.deltaTime;
         currentHunger -= hungerDecreaseRate * Time.deltaTime;
 
-        
         currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
         currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
 
-        
+        // Susuzluk sıfırsa timer'ı çalıştır
         if (currentThirst <= 0)
         {
-            currentHealth -= healthDecreaseRate * Time.deltaTime;
+            thirstReductionTimer += Time.deltaTime;
+            if (thirstReductionTimer >= sheepReductionInterval)
+            {
+                SheepManager.Instance.DecreaseSheepCount(); // Koyun sayısını azalt
+                thirstReductionTimer = 0f; // Timer sıfırla
+            }
+        }
+        else
+        {
+            thirstReductionTimer = 0f; // Timer sıfırla
         }
 
+        // Açlık sıfırsa timer'ı çalıştır
         if (currentHunger <= 0)
         {
-            currentHealth -= healthDecreaseRate * Time.deltaTime;
+            hungerReductionTimer += Time.deltaTime;
+            if (hungerReductionTimer >= sheepReductionInterval)
+            {
+                SheepManager.Instance.DecreaseSheepCount(); // Koyun sayısını azalt
+                hungerReductionTimer = 0f; // Timer sıfırla
+            }
+        }
+        else
+        {
+            hungerReductionTimer = 0f; // Timer sıfırla
         }
 
-        
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
-
-        
         UpdateSliders();
     }
 
     private void UpdateSliders()
     {
-        healthSlider.value = currentHealth / maxHealth; 
-        thirstSlider.value = currentThirst / maxThirst; 
-        hungerSlider.value = currentHunger / maxHunger; 
-    }
-    public void TakeDamage(float damage)
-    {
-        currentHealth -= damage; // Sağlığı azalt
-        currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth); // Sağlığı sınırla
+        thirstSlider.value = currentThirst / maxThirst;
+        hungerSlider.value = currentHunger / maxHunger;
 
-        UpdateSliders(); // UI güncelle
-
-        if (currentHealth <= 0)
-        {
-            Debug.Log("Sürü öldü!"); // Sağlık sıfırlandığında işlem yapılabilir
-        }
+        thirstText.text = $"{Mathf.FloorToInt(currentThirst)}/{Mathf.FloorToInt(maxThirst)}";
+        hungerText.text = $"{Mathf.FloorToInt(currentHunger)}/{Mathf.FloorToInt(maxHunger)}";
     }
 }
