@@ -163,4 +163,18 @@ public class Wolf : MonoBehaviour
         Debug.Log("Kurt saldırdıktan sonra kaçtı ve yok oldu.");
         Destroy(gameObject); // Destroy the wolf after it escapes
     }
+    public void StartEscapeAfterAttack()
+    {
+        isEscaping = true;
+        navAgent.speed = 10f;
+
+        Vector3 randomEscapePosition = new Vector3(
+            transform.position.x + Random.Range(20f, 50f),
+            transform.position.y,
+            transform.position.z + Random.Range(20f, 50f)
+        );
+        navAgent.SetDestination(randomEscapePosition); // Kaçış noktası belirle
+        Debug.Log("Kurt kaçışa yönlendirildi.");
+        StartCoroutine(DestroyAfterEscape()); // Kaçış noktasına ulaştığında yok ol
+    }
 }

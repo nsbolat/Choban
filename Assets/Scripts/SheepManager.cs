@@ -205,6 +205,16 @@ public class SheepManager : MonoBehaviour
     {
         baseRadius = Mathf.Sqrt(sheepList.Count) * sheepRadius;
     }
+    public void RejoinEscapedSheep()
+    {
+        for (int i = escapedSheepList.Count - 1; i >= 0; i--)
+        {
+            Sheep escapedSheep = escapedSheepList[i];
+            AddSheep(escapedSheep); // Kaçan koyunu sürüye geri ekle
+            escapedSheep.MoveToPosition(target.position); // Hedefe doğru hareket ettir
+            Debug.Log("Kaçan koyun sürüye geri döndü!");
+        }
+    }
     public void DecreaseSheepCount()
     {
         if (sheepList.Count > 0)

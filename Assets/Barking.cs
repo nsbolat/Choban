@@ -10,6 +10,11 @@ public class Barking : MonoBehaviour
     [SerializeField] private AudioSource audioSource; // Ses çalacak kaynak
     [SerializeField] private Animator _playerAnim;
 
+    private float qCooldown = 0f; // Q tuşu bekleme süresi
+    private float eCooldown = 0f; // E tuşu bekleme süresi
+    private float qCooldownDuration = 3f; // Q için cooldown süresi
+    private float eCooldownDuration = 5f; // E için cooldown süresi
+
     private void Start()
     {
         // AudioSource referansını al
@@ -23,19 +28,36 @@ public class Barking : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        // Cooldown sürelerini azalt
+        if (qCooldown > 0)
         {
-            _playerAnim.SetTrigger("Havla");
+            qCooldown -= Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if (eCooldown > 0)
+        {
+            eCooldown -= Time.deltaTime;
+        }
+
+        // E tuşu için cooldown kontrolü
+        if (Input.GetKeyDown(KeyCode.E) && eCooldown <= 0)
+        {
+            _playerAnim.SetTrigger("Havla");
+            SheepManager.Instance.RejoinEscapedSheep(); // Kaçan koyunları geri getir
+            eCooldown = eCooldownDuration; // E tuşu cooldown başlat
+            Debug.Log("E tuşu kullanıldı. Cooldown başladı: " + eCooldownDuration + " saniye.");
+        }
+
+        // Q tuşu için cooldown kontrolü
+        if (Input.GetKeyDown(KeyCode.Q) && qCooldown <= 0)
         {
             _playerAnim.SetTrigger("Havla2");
+            WolfSpawner.Instance.SendNearbyWolvesToEscapePoint(); // Yakındaki kurtları kaçışa gönder
+            qCooldown = qCooldownDuration; // Q tuşu cooldown başlat
+            Debug.Log("Q tuşu kullanıldı. Cooldown başladı: " + qCooldownDuration + " saniye.");
         }
     }
-    
-    
-    
+
     // Havlama animasyon event'inde çağrılacak fonksiyon
     public void PlayBarkSheepSound()
     {
@@ -51,6 +73,7 @@ public class Barking : MonoBehaviour
             audioSource.PlayOneShot(randomBark);
         }
     }
+
     public void PlayBarkWolfSound()
     {
         if (barkWolfSounds.Length > 0)

@@ -51,4 +51,19 @@ public class WolfSpawner : MonoBehaviour
             
         }
     }
+    public void SendNearbyWolvesToEscapePoint()
+    {
+        float sendRadius = 10f; // Kurtları kaçış noktasına göndermek için menzil
+        Wolf[] wolves = FindObjectsOfType<Wolf>();
+
+        foreach (var wolf in wolves)
+        {
+            float distance = Vector3.Distance(wolf.transform.position, PlayerController.Instance.transform.position);
+            if (distance <= sendRadius)
+            {
+                Debug.Log("Yakındaki kurt kaçış noktasına gönderiliyor!");
+                wolf.StartEscapeAfterAttack(); // Kurdu kaçış fonksiyonuna yönlendir
+            }
+        }
+    }
 }
