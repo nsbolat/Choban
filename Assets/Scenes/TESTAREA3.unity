@@ -7081,6 +7081,7 @@ MonoBehaviour:
   escapeInterval: 5
   sheepList: []
   escapedSheepList: []
+  gameOverPanel: {fileID: 0}
 --- !u!114 &1605604710
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7093,18 +7094,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e44adcaac58f6246bb089d021f27330, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  healthSlider: {fileID: 0}
   thirstSlider: {fileID: 0}
   hungerSlider: {fileID: 0}
-  maxHealth: 100
+  thirstText: {fileID: 0}
+  hungerText: {fileID: 0}
   maxThirst: 100
   maxHunger: 100
-  currentHealth: 0
   currentThirst: 0
   currentHunger: 0
   thirstDecreaseRate: 10
   hungerDecreaseRate: 15
-  healthDecreaseRate: 5
+  sheepReductionInterval: 5
 --- !u!1 &1697307177
 GameObject:
   m_ObjectHideFlags: 0
