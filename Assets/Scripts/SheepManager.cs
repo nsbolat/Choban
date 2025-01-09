@@ -46,7 +46,10 @@ public class SheepManager : MonoBehaviour
 
     private void Start()
     {
-        gameOverPanel.SetActive(false);
+        if (gameOverPanel!=null)
+        {
+            gameOverPanel.SetActive(false);
+        }
 
         foreach (Sheep sheep in FindObjectsOfType<Sheep>())
         {

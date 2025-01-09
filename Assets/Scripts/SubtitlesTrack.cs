@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.Timeline;
 
 [TrackBindingType(typeof(TextMeshProUGUI))]
+[TrackClipType(typeof(SubtitleClip))]
 public class SubtitlesTrack : TrackAsset
 {
     // Start is called before the first frame update
