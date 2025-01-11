@@ -10,18 +10,17 @@ public class SurvivalSystem : MonoBehaviour
     [SerializeField] private TextMeshProUGUI thirstText;
     [SerializeField] private TextMeshProUGUI hungerText;
 
-    [SerializeField] private float maxThirst = 100f;
-    [SerializeField] private float maxHunger = 100f;
+    public float maxThirst = 100f;
+    public float maxHunger = 100f;
 
-    [SerializeField] private float currentThirst;
-    [SerializeField] private float currentHunger;
-
-    [SerializeField] private float thirstDecreaseRate = 10f;
-    [SerializeField] private float hungerDecreaseRate = 15f;
-
+    public float currentThirst;
+    public float currentHunger;
+  
     [SerializeField] private float sheepReductionInterval = 5f; // 5 saniye
     private float thirstReductionTimer = 0f;
     private float hungerReductionTimer = 0f;
+
+    public bool isFeeding = false; // Besin alanı içinde olup olmadığını kontrol etmek için eklendi
 
     private void Awake()
     {
@@ -42,11 +41,25 @@ public class SurvivalSystem : MonoBehaviour
 
     private void Update()
     {
-        currentThirst -= thirstDecreaseRate * Time.deltaTime;
-        currentHunger -= hungerDecreaseRate * Time.deltaTime;
+        float previousHunger = currentHunger;  // Önceki açlık değerini kaydediyoruz
 
+        if (isFeeding)
+        {
+            // Besin alanında olduğunda açlık artmaya devam eder
+            currentHunger += 5 * Time.deltaTime; // 20 açlık değeri her saniye artacak
+            currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
+        }
+        else
+        {
+            // Besin alanı dışında olduğunda açlık azalmaya devam eder
+            currentHunger -= 5 * Time.deltaTime;
+            currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
+        }
+
+        
+
+        currentThirst -= 5 * Time.deltaTime;
         currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
-        currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
 
         // Susuzluk sıfırsa timer'ı çalıştır
         if (currentThirst <= 0)
@@ -81,7 +94,7 @@ public class SurvivalSystem : MonoBehaviour
         UpdateSliders();
     }
 
-    private void UpdateSliders()
+    public void UpdateSliders()
     {
         thirstSlider.value = currentThirst / maxThirst;
         hungerSlider.value = currentHunger / maxHunger;
