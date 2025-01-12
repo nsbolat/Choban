@@ -49,12 +49,12 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.42891252
-  m_Height: 12.401793
+  m_Height: 4.7097125
   m_Direction: 1
-  m_Center: {x: 0, y: 5.7008963, z: 0}
+  m_Center: {x: 0, y: 1.8548563, z: 0}
 --- !u!1 &7504370504721653703
 GameObject:
   m_ObjectHideFlags: 0
@@ -81,7 +81,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7504370504721653703}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -14.664656, y: 1.995964, z: 25.919762}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0

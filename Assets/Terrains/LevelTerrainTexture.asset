@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c509dbaa7b6f416409e3195321a2187e, type: 3}
+  m_Name: LevelTerrainTexture
+  m_EditorClassIdentifier: 
+  PaletteLayers:
+  - {fileID: 8574412962073106934, guid: df4925b3b27cddf4ba8ceb725d6a8542, type: 2}
+  - {fileID: 8574412962073106934, guid: 2c17f05dc9169c2448df4bdd5e0eb8eb, type: 2}
+  - {fileID: 8574412962073106934, guid: 5a05dd91f5606e348af601a12283eed0, type: 2}
+  - {fileID: 8574412962073106934, guid: d0b26032f1fb51c4e9f215916b15b12b, type: 2}

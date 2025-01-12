@@ -7,13 +7,15 @@ public class Sheep : MonoBehaviour
     private NavMeshAgent navAgent;
     [SerializeField] private Animator sheepAnim;
     [SerializeField] private Animator _playerAnim;
-    [SerializeField] public bool isEscaped = false;// Koyunun kaçıp kaçmadığını kontrol eder
+    [SerializeField] public bool isEscaped = false;// Koyunun kaçıp kaçmadığını kontrol eder,
+    [SerializeField] private SurvivalSystem _survivalSystem;
 
 
     void Start()
     {
         navAgent = GetComponent<NavMeshAgent>();
         _playerAnim = GameObject.FindWithTag("Köpek").GetComponent<Animator>();
+        _survivalSystem = FindObjectOfType<SurvivalSystem>();
         navAgent.stoppingDistance = 0.1f;
     }
 
@@ -32,6 +34,18 @@ public class Sheep : MonoBehaviour
             {
                 RejoinFlock();
             }
+        }
+
+        if (_survivalSystem.isFeeding)
+        {
+            sheepAnim.SetBool("otlama",true);
+            sheepAnim.SetTrigger("Otla");
+        }
+        else
+        {
+            sheepAnim.SetBool("otlama",false);
+            sheepAnim.ResetTrigger("Otla");
+            
         }
 
 

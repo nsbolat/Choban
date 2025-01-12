@@ -10862,8 +10862,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 394, y: -26.76}
-  m_SizeDelta: {x: 748, y: 33.52}
+  m_AnchoredPosition: {x: 154.585, y: -26.76}
+  m_SizeDelta: {x: 269.17, y: 33.52}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5677543880631192707
 GameObject:
@@ -11384,7 +11384,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0}
   m_AnchorMax: {x: 0.5, y: 0}
   m_AnchoredPosition: {x: 0, y: 50}
-  m_SizeDelta: {x: 788, y: 53.52}
+  m_SizeDelta: {x: 309.17, y: 53.52}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!4 &7252172282016218026
 Transform:
@@ -11776,7 +11776,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "Bu koyunlar ba\u015Flar\u0131nda biri olmadan hayatta kalamazlar."
+  m_text: "Vaktim \xE7ok kalmad\u0131."
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -11785,8 +11785,8 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 335544319
-  m_fontColor: {r: 1, g: 1, b: 1, a: 0.07407403}
+    rgba: 587202559
+  m_fontColor: {r: 1, g: 1, b: 1, a: 0.1318636}
   m_enableVertexGradient: 0
   m_colorMode: 3
   m_fontColorGradient:
