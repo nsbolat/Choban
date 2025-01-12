@@ -19,7 +19,7 @@ public class SurvivalSystem : MonoBehaviour
     [SerializeField] private float sheepReductionInterval = 5f;
     private float thirstReductionTimer = 0f;
     private float hungerReductionTimer = 0f;
-    public bool isFeeding = false;
+    public bool isFeeding, isWatering = false;
 
     private void Awake()
     {
@@ -51,10 +51,19 @@ public class SurvivalSystem : MonoBehaviour
             currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
         }
 
-        currentThirst -= azalmaHızıSusuzluk * Time.deltaTime;
-        currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+        if (isWatering)
+        {
+            currentThirst += artmaHızıSusuzluk * Time.deltaTime;
+            currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+        }
+        else
+        {
+            currentThirst -= azalmaHızıSusuzluk * Time.deltaTime;
+            currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+        }
 
-        if (currentThirst <= 0)
+
+        if (currentThirst <= 0 && !isWatering)
         {
             thirstReductionTimer += Time.deltaTime;
             if (thirstReductionTimer >= sheepReductionInterval)
@@ -63,13 +72,10 @@ public class SurvivalSystem : MonoBehaviour
                 thirstReductionTimer = 0f;
             }
         }
-        else
-        {
-            thirstReductionTimer = 0f;
-        }
 
         if (currentHunger <= 0)
         {
+            Debug.Log("Susuzluk bitti");
             hungerReductionTimer += Time.deltaTime;
             if (hungerReductionTimer >= sheepReductionInterval)
             {
@@ -108,4 +114,23 @@ public class SurvivalSystem : MonoBehaviour
     {
         isFeeding = false;
     }
+    public void IncreaseThirst(float amount)
+    {
+        currentThirst += amount;
+        currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+    }
+
+    public void StartThirstIncrease()
+    {
+        isWatering = true; // Or create a separate bool for thirst-related feeding
+        Debug.Log("Su içiyo");
+
+    }
+
+    public void StopThirstIncrease()
+    {
+        isWatering = false; // Or create a separate bool for thirst-related feeding
+        Debug.Log("Su içmiyo");
+    }
+    
 }

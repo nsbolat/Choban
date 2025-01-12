@@ -12,6 +12,7 @@ public class FoodZone : MonoBehaviour
     private bool hasLoggedMessage = false; // Mesajın yazılıp yazılmadığını takip eden değişken
     [SerializeField] private GameObject noEatGrass, eatedGrass;
     private WorldTime.WorldTime worldTime;
+    [SerializeField] private float EatTime;
     private int daysSinceEmpty = 0;
 
     void Start()
@@ -51,7 +52,7 @@ public class FoodZone : MonoBehaviour
     {
         if (isFeeding && survivalSystem.currentHunger != 101)
         {
-            float hungerIncreaseAmount = Time.deltaTime * 10;
+            float hungerIncreaseAmount = Time.deltaTime * EatTime;
             foodValue -= hungerIncreaseAmount;
             foodTimerBar.value = foodValue;
 
