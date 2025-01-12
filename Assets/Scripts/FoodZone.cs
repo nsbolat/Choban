@@ -101,7 +101,8 @@ public class FoodZone : MonoBehaviour
         }
     }
 
-    void StartFeeding()
+    
+     void StartFeeding()
     {
         isFeeding = true;
         foodTimerBar.value = foodValue;
@@ -123,4 +124,5 @@ public class FoodZone : MonoBehaviour
             survivalSystem.StopHungerIncrease();
         }
     }
+    
 }

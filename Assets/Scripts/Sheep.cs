@@ -36,7 +36,7 @@ public class Sheep : MonoBehaviour
             }
         }
 
-        if (_survivalSystem.isFeeding)
+        if (_survivalSystem.isFeeding || _survivalSystem.isWatering)
         {
             sheepAnim.SetBool("otlama",true);
             sheepAnim.SetTrigger("Otla");

@@ -20,6 +20,8 @@ public class SurvivalSystem : MonoBehaviour
     private float thirstReductionTimer = 0f;
     private float hungerReductionTimer = 0f;
     public bool isFeeding = false;
+    public bool isWatering = false;
+
 
     private void Awake()
     {
@@ -51,8 +53,17 @@ public class SurvivalSystem : MonoBehaviour
             currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
         }
 
-        currentThirst -= azalmaHızıSusuzluk * Time.deltaTime;
-        currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+        if (isWatering)
+        {
+            currentThirst += artmaHızıSusuzluk * Time.deltaTime;
+            currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+        }
+        else
+        {
+            currentThirst -= azalmaHızıSusuzluk * Time.deltaTime;
+            currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
+        }
+
 
         if (currentThirst <= 0)
         {
@@ -99,6 +110,12 @@ public class SurvivalSystem : MonoBehaviour
         currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
     }
 
+    public void IncreaseThirst(float amount)
+    {
+        currentThirst += amount;
+        currentThirst = Mathf.Clamp(currentThirst, 0, maxHunger);
+    }
+
     public void StartHungerIncrease()
     {
         isFeeding = true;
@@ -107,5 +124,15 @@ public class SurvivalSystem : MonoBehaviour
     public void StopHungerIncrease()
     {
         isFeeding = false;
+    }
+
+    public void StartWaterIncrease()
+    {
+        isWatering = true;
+    }
+
+    public void StopWaterIncrease()
+    {
+        isWatering = false;
     }
 }
