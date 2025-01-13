@@ -25,8 +25,10 @@ public class FoodZone : MonoBehaviour
         foodTimerBar.value = foodValue;
         
         worldTime = FindObjectOfType<WorldTime.WorldTime>(); // WorldTime referansı alın
-
-        worldTime.OnDayChanged += OnDayChanged; // OnDayChanged olayını dinleyin
+        if (worldTime!=null)
+        {
+            worldTime.OnDayChanged += OnDayChanged; // OnDayChanged olayını dinleyin
+        }
     }
 
     void OnTriggerEnter(Collider other)

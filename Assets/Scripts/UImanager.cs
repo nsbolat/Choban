@@ -5,29 +5,34 @@ using UnityEngine.Audio;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using UnityEngine.Serialization;
 
 
 public class UImanager : MonoBehaviour
 {
     //menu
     public Button btn1,btn2,btn3,btn4;
-    public GameObject optionsekraný, creditsekraný, menuekraný;
-    //OPTÝON
+    public GameObject optionsekrani;
+    public GameObject creditsekrani;
+    public GameObject menuekrani;
+
+    //OPTï¿½ON
     public AudioMixer audioMixer;
     public TMP_Dropdown resolutionDropdown;
     public Button btn5;
-    //CREDÝT
+    //CREDï¿½T
     public Button btn6;
     //
     Resolution[] resolutions;
 
     void Start()
     {
-        optionsekraný.SetActive(false);
-        creditsekraný.SetActive(false);
+        Time.timeScale = 1f;
+        optionsekrani.SetActive(false);
+        creditsekrani.SetActive(false);
 
 
-        //OPTÝONS**************************
+        //OPTï¿½ONS**************************
         resolutions = Screen.resolutions;
         resolutionDropdown.ClearOptions();
 
@@ -55,20 +60,20 @@ public class UImanager : MonoBehaviour
     public void s() { }
 
 
-    public void crdon() { creditsekraný.SetActive(false); }
+    public void crdon() { creditsekrani.SetActive(false); }
     public void opdon(){
-        menuekraný.SetActive(true);
-        optionsekraný.SetActive(false);}
+        menuekrani.SetActive(true);
+        optionsekrani.SetActive(false);}
     public void exit() { Application.Quit(); }
     public void cutscenegec()  {  SceneManager.LoadScene (1);}
     public void opgit() {
-        menuekraný.SetActive(false);
-        optionsekraný.SetActive(true);
+        menuekrani.SetActive(false);
+        optionsekrani.SetActive(true);
     }
-    public void crgit(){ creditsekraný.SetActive(true); }
+    public void crgit(){ creditsekrani.SetActive(true); }
 
 
-    //OPTÝONS*************************************
+    //OPTï¿½ONS*************************************
     public void SetResulation(int resolutionIndex)
     {
         Resolution resolution = resolutions[resolutionIndex];

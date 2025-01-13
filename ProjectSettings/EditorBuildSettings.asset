@@ -12,6 +12,6 @@ EditorBuildSettings:
     path: Assets/Scenes/Cutscene.unity
     guid: 39f6e87d09011f04084b00bc8ed2932e
   - enabled: 1
-    path: Assets/Scenes/TESTAREA3.unity
+    path: Assets/Scenes/GameLevel.unity
     guid: 18a427c49632e7646bef19cf14c46ed8
   m_configObjects: {}
