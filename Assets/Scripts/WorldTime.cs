@@ -15,12 +15,14 @@ namespace WorldTime
         [SerializeField, Tooltip("Oyunun başlangıç saati (saat cinsinden)")]
         private int _startHour = 6; // Varsayılan: 06:00
 
-        private TimeSpan _currentTime = TimeSpan.Zero; 
-        private int _currentDay = 1; 
+        private TimeSpan _currentTime = TimeSpan.Zero;
+        private int _currentDay = 1;
 
         private float _minuteLength => (_dayLengthInMinutes * 60f) / WorldTimeConstans.MinutesInDay; // Dakikayı saniyeye çevir
 
         public event Action<int> OnDayChanged;
+
+        private bool isPaused = false; // Oyun duraklatıldı mı?
 
         private void Awake()
         {
@@ -36,17 +38,23 @@ namespace WorldTime
 
         private IEnumerator AddMinute()
         {
-            _currentTime += TimeSpan.FromMinutes(1);
-
-            if (_currentTime.TotalMinutes >= WorldTimeConstans.MinutesInDay)
+            while (true)
             {
-                _currentTime = TimeSpan.Zero;
-                IncrementDay();
-            }
+                if (!isPaused)
+                {
+                    _currentTime += TimeSpan.FromMinutes(1);
 
-            WorldTimeChanged?.Invoke(this, _currentTime);
-            yield return new WaitForSeconds(_minuteLength);
-            StartCoroutine(AddMinute());
+                    if (_currentTime.TotalMinutes >= WorldTimeConstans.MinutesInDay)
+                    {
+                        _currentTime = TimeSpan.Zero;
+                        IncrementDay();
+                    }
+
+                    WorldTimeChanged?.Invoke(this, _currentTime);
+                }
+
+                yield return new WaitForSeconds(_minuteLength);
+            }
         }
 
         public void AddTime(TimeSpan timeToAdd)
@@ -77,6 +85,17 @@ namespace WorldTime
         public TimeSpan GetCurrentTime()
         {
             return _currentTime;
+        }
+
+        // Pause sistemine eklenen fonksiyonlar
+        public void PauseTime()
+        {
+            isPaused = true;
+        }
+
+        public void ResumeTime()
+        {
+            isPaused = false;
         }
     }
 }
