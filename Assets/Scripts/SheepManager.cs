@@ -12,6 +12,7 @@ public class SheepManager : MonoBehaviour
     [SerializeField] private RectTransform circleRectTransform; // Daire UI'si için referans
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private TMP_Text sheepCountText;
+    [SerializeField] private TMP_Text notificationText; // Notification Text
 
     [Header("Values")]
     [SerializeField] private float baseRadius = 2f; // Dairenin yarıçapı
@@ -41,6 +42,10 @@ public class SheepManager : MonoBehaviour
         else
         {
             Destroy(gameObject);
+        }
+        if (notificationText != null)
+        {
+            notificationText.gameObject.SetActive(false);  // Başlangıçta kapalı yap
         }
     }
 
@@ -137,9 +142,29 @@ public class SheepManager : MonoBehaviour
             escapingSheep.Escape(escapePosition);
             escapedSheepList.Add(escapingSheep);
             Debug.Log("Bir koyun kaçtı!");
+            ShowEscapeNotification("Bir koyun kaçıyor!"); // Bildirimi göster
+        }
+    }
+    private void ShowEscapeNotification(string message)
+    {
+        if (notificationText != null)
+        {
+            notificationText.text = message;  // Bildirim metni ayarla
+            notificationText.gameObject.SetActive(true);  // UI'yi aktif hale getir
+
+            // Belirli bir süre sonra metni sıfırla
+            Invoke("ClearNotification", 4f);  // 4 saniye sonra bildirimi kaldır
         }
     }
 
+    private void ClearNotification()
+    {
+        if (notificationText != null)
+        {
+            notificationText.text = "";  // Metni sıfırla
+            notificationText.gameObject.SetActive(false);  // UI'yi pasifleştir
+        }
+    }
     public void AddSheep(Sheep newSheep)
     {
         if (!sheepList.Contains(newSheep))
