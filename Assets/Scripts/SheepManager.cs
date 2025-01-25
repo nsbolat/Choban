@@ -207,7 +207,7 @@ public class SheepManager : MonoBehaviour
     {
         if (sheepCountText != null)
         {
-            sheepCountText.text = "Koyun Sayısı: " + sheepList.Count;
+            sheepCountText.text =sheepList.Count.ToString();
         }
 
 

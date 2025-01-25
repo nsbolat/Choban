@@ -13,6 +13,9 @@ public class BarnMechanic : MonoBehaviour
     public TextMeshProUGUI dayCounterText;
     public float fadeDuration = 5f;
     public WorldTime.WorldTime worldTime;
+    public Transform dogHouseTrigger; // Köpek kulübesi için trigger alanı
+    public GameObject player;
+    public float interactionRange = 2f; // Köpek kulübesi ile etkileşim mesafesi
 
     private bool isResting = false;
     private bool isPlayerInBarn = false;
@@ -43,19 +46,10 @@ public class BarnMechanic : MonoBehaviour
         {
             sheepInBarnCount++;
         }
-
-        int currentDay = worldTime.GetCurrentDay();
-
-        // Tüm koşullar sağlanıyorsa ve bugünkü dinlenme yapılmadıysa
-        if (isPlayerInBarn && sheepInBarnCount == totalSheepCount && !isResting && lastRestedDay != currentDay)
-        {
-            StartCoroutine(RestAtBarn());
-        }
     }
 
     void OnTriggerExit(Collider other)
     {
-        // Eğer dinlenme işlemi devam ediyorsa çıkışları kontrol etme
         if (isResting) return;
 
         if (other.CompareTag("Köpek"))
@@ -69,6 +63,17 @@ public class BarnMechanic : MonoBehaviour
         }
     }
 
+    private void Update()
+    {
+        int currentDay = worldTime.GetCurrentDay();
+
+        // Eğer oyuncu köpek kulübesi alanındaysa, E tuşuna basıyorsa ve bugünkü dinlenme yapılmadıysa
+        if (sheepInBarnCount == totalSheepCount && !isResting && IsNearDogHouse() && Input.GetKeyDown(KeyCode.Z) && lastRestedDay != currentDay)
+        {
+            StartCoroutine(RestAtBarn());
+        }
+    }
+
     private IEnumerator RestAtBarn()
     {
         if (isResting) yield break;
@@ -78,9 +83,7 @@ public class BarnMechanic : MonoBehaviour
         fadeScreen.SetActive(true);
         statusTextObject.SetActive(true);
         dayCounterText.gameObject.SetActive(false);
-
         yield return new WaitForSeconds(fadeDuration);
-
         fadeScreen.SetActive(false);
         statusTextObject.SetActive(false);
 
@@ -99,9 +102,13 @@ public class BarnMechanic : MonoBehaviour
 
     private void UpdateDayCounter()
     {
-        dayCounterText.text = "Gün:" + worldTime.GetCurrentDay();
+        dayCounterText.text = worldTime.GetCurrentDay().ToString();
+    }
+
+    private bool IsNearDogHouse()
+    {
+        // Oyuncunun köpek kulübesine olan mesafesini kontrol eder
+        float distanceToDogHouse = Vector3.Distance(player.transform.position, dogHouseTrigger.position);
+        return distanceToDogHouse <= interactionRange;
     }
 }
-
-
-
