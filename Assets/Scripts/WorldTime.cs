@@ -7,6 +7,8 @@ namespace WorldTime
 {
     public class WorldTime : MonoBehaviour
     {
+
+       
         public event EventHandler<TimeSpan> WorldTimeChanged;
 
         [SerializeField, Tooltip("Bir günün uzunluğu (dakika cinsinden)")]

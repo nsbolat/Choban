@@ -60,7 +60,11 @@ public class UImanager : MonoBehaviour
     public void s() { }
 
 
-    public void crdon() { creditsekrani.SetActive(false); }
+    public void crdon()
+    {
+        creditsekrani.SetActive(false);
+        menuekrani.SetActive(true);
+    }
     public void opdon(){
         menuekrani.SetActive(true);
         optionsekrani.SetActive(false);}
@@ -70,7 +74,12 @@ public class UImanager : MonoBehaviour
         menuekrani.SetActive(false);
         optionsekrani.SetActive(true);
     }
-    public void crgit(){ creditsekrani.SetActive(true); }
+
+    public void crgit()
+    {
+        creditsekrani.SetActive(true);
+        menuekrani.SetActive(false);
+    }
 
 
     //OPT�ONS*************************************

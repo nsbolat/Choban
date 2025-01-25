@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+
 public class SurvivalSystem : MonoBehaviour
 {
     [SerializeField] private Slider thirstSlider;
@@ -22,7 +23,6 @@ public class SurvivalSystem : MonoBehaviour
     public bool isFeeding = false;
     public bool isWatering = false;
 
-
     private void Awake()
     {
         thirstSlider = GameObject.Find("sheepThirst").GetComponent<Slider>();
@@ -36,16 +36,22 @@ public class SurvivalSystem : MonoBehaviour
         currentThirst = maxThirst;
         currentHunger = maxHunger;
         UpdateSliders();
+
+        WorldTime.WorldTime worldTime = FindObjectOfType<WorldTime.WorldTime>();
+        if (worldTime != null)
+        {
+            worldTime.OnDayChanged += OnNewDay;
+        }
     }
+
+    
 
     private void Update()
     {
         if (isFeeding)
         {
             currentHunger += artmaHızıHunger * Time.deltaTime;
-            currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger); // 100'ü aşmaz
-
-            // Beslenme 100 olsa bile devam eder
+            currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
         }
         else
         {
@@ -63,7 +69,6 @@ public class SurvivalSystem : MonoBehaviour
             currentThirst -= azalmaHızıSusuzluk * Time.deltaTime;
             currentThirst = Mathf.Clamp(currentThirst, 0, maxThirst);
         }
-
 
         if (currentThirst <= 0)
         {
@@ -104,6 +109,10 @@ public class SurvivalSystem : MonoBehaviour
         hungerText.text = $"{Mathf.FloorToInt(currentHunger)}/{Mathf.FloorToInt(maxHunger)}";
     }
 
+
+
+ 
+
     public void IncreaseHunger(float amount)
     {
         currentHunger += amount;
@@ -134,5 +143,12 @@ public class SurvivalSystem : MonoBehaviour
     public void StopWaterIncrease()
     {
         isWatering = false;
+    }
+    
+    private void OnNewDay(int day)
+    {
+        currentHunger = Mathf.Clamp(currentHunger - 20, 0, maxHunger);
+        currentThirst = Mathf.Clamp(currentThirst - 20, 0, maxThirst);
+        UpdateSliders();
     }
 }
