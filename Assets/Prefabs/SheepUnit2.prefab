@@ -1032,7 +1032,8 @@ AudioSource:
   m_GameObject: {fileID: 3171995556224004002}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 3926217418523276135, guid: 0b3984a1c61b7de41a88a1660ccb07ec,
+    type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 1
@@ -2063,7 +2064,8 @@ AudioSource:
   m_GameObject: {fileID: 6802626754802255470}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: 3926217418523276135, guid: 0b3984a1c61b7de41a88a1660ccb07ec,
+    type: 2}
   m_audioClip: {fileID: 0}
   m_PlayOnAwake: 0
   m_Volume: 0.5
@@ -2424,6 +2426,7 @@ MonoBehaviour:
   sheepAnim: {fileID: 4176778102823269427}
   _playerAnim: {fileID: 0}
   isEscaped: 0
+  _survivalSystem: {fileID: 0}
 --- !u!54 &3810695847765770441
 Rigidbody:
   m_ObjectHideFlags: 0

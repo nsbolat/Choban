@@ -24,9 +24,13 @@ namespace WorldTime
 
         private bool isPaused = false; // Oyun duraklatıldı mı?
 
+        [Header("Atmosfer Ses Ayarları")]
+        [SerializeField] private AudioSource atmosphereAudioSource; // Sahnedeki AudioSource
+        [SerializeField] private AudioClip dayClip; // Gündüz sesi
+        [SerializeField] private AudioClip nightClip; // Gece sesi
+
         private void Awake()
         {
-            // Inspector'dan gelen başlangıç saatini TimeSpan'e çevir
             _currentTime = TimeSpan.FromHours(_startHour);
         }
 
@@ -34,6 +38,7 @@ namespace WorldTime
         {
             StartCoroutine(AddMinute());
             WorldTimeChanged?.Invoke(this, _currentTime);
+            UpdateAtmosphereSound(); // İlk başta sesin doğru ayarlanması
         }
 
         private IEnumerator AddMinute()
@@ -51,6 +56,7 @@ namespace WorldTime
                     }
 
                     WorldTimeChanged?.Invoke(this, _currentTime);
+                    UpdateAtmosphereSound(); // Zaman her değiştiğinde ses güncelle
                 }
 
                 yield return new WaitForSeconds(_minuteLength);
@@ -68,6 +74,7 @@ namespace WorldTime
             }
 
             WorldTimeChanged?.Invoke(this, _currentTime);
+            UpdateAtmosphereSound(); // Zaman eklendiğinde ses güncelle
         }
 
         private void IncrementDay()
@@ -96,6 +103,27 @@ namespace WorldTime
         public void ResumeTime()
         {
             isPaused = false;
+        }
+
+        private void UpdateAtmosphereSound()
+        {
+            // Gündüz saatleri: 6:00 - 18:00
+            if (_currentTime.Hours >= 6 && _currentTime.Hours < 18)
+            {
+                if (atmosphereAudioSource.clip != dayClip) // Gündüz sesi oynatılmıyorsa
+                {
+                    atmosphereAudioSource.clip = dayClip;
+                    atmosphereAudioSource.Play();
+                }
+            }
+            else // Gece saatleri: 18:00 - 6:00
+            {
+                if (atmosphereAudioSource.clip != nightClip) // Gece sesi oynatılmıyorsa
+                {
+                    atmosphereAudioSource.clip = nightClip;
+                    atmosphereAudioSource.Play();
+                }
+            }
         }
     }
 }

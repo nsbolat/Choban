@@ -1,8 +1,6 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 using TMPro;
 using WorldTime;
 
@@ -10,6 +8,9 @@ public class BarnMechanic : MonoBehaviour
 {
     public GameObject fadeScreen;
     public GameObject statusTextObject;
+    public GameObject restPanel; // "Uyumak için Z'ye bas" paneli
+    public GameObject sheepMissingPanel; // "Koyunların hepsi ahırda değil" paneli
+    public GameObject alreadyRestedPanel; // "Bu gün zaten uyudun" paneli
     public TextMeshProUGUI dayCounterText;
     public float fadeDuration = 5f;
     public WorldTime.WorldTime worldTime;
@@ -28,6 +29,9 @@ public class BarnMechanic : MonoBehaviour
         totalSheepCount = GameObject.FindGameObjectsWithTag("Koyun").Length; // Toplam koyun sayısını belirle
         UpdateDayCounter();
         worldTime.OnDayChanged += OnDayChanged; // Gün değişim event'ine abone ol
+        restPanel.SetActive(false); // Paneller başlangıçta kapalı
+        sheepMissingPanel.SetActive(false);
+        alreadyRestedPanel.SetActive(false);
     }
 
     private void OnDestroy()
@@ -55,6 +59,7 @@ public class BarnMechanic : MonoBehaviour
         if (other.CompareTag("Köpek"))
         {
             isPlayerInBarn = false;
+            CloseAllPanels(); // Oyuncu uzaklaşınca panelleri kapat
         }
 
         if (other.CompareTag("Koyun"))
@@ -67,10 +72,36 @@ public class BarnMechanic : MonoBehaviour
     {
         int currentDay = worldTime.GetCurrentDay();
 
-        // Eğer oyuncu köpek kulübesi alanındaysa, E tuşuna basıyorsa ve bugünkü dinlenme yapılmadıysa
-        if (sheepInBarnCount == totalSheepCount && !isResting && IsNearDogHouse() && Input.GetKeyDown(KeyCode.Z) && lastRestedDay != currentDay)
+        // Köpek kulübesine yakınlık ve etkileşim kontrolü
+        if (IsNearDogHouse())
         {
-            StartCoroutine(RestAtBarn());
+            if (sheepInBarnCount == totalSheepCount)
+            {
+                if (lastRestedDay == currentDay)
+                {
+                    // Bugün zaten uyumuş, "Bu gün zaten uyudun" panelini göster
+                    ShowAlreadyRestedPanel();
+                }
+                else
+                {
+                    // Tüm koyunlar ahırda, uyumak için paneli göster
+                    ShowRestPanel();
+
+                    if (!isResting && Input.GetKeyDown(KeyCode.Z))
+                    {
+                        StartCoroutine(RestAtBarn());
+                    }
+                }
+            }
+            else
+            {
+                // Tüm koyunlar ahırda değil, uyuyamazsın paneli göster
+                ShowSheepMissingPanel();
+            }
+        }
+        else
+        {
+            CloseAllPanels(); // Köpek kulübesinden uzaksa panelleri kapat
         }
     }
 
@@ -80,10 +111,13 @@ public class BarnMechanic : MonoBehaviour
 
         isResting = true;
 
+        CloseAllPanels(); // Dinlenme sırasında panelleri kapat
         fadeScreen.SetActive(true);
         statusTextObject.SetActive(true);
         dayCounterText.gameObject.SetActive(false);
+
         yield return new WaitForSeconds(fadeDuration);
+
         fadeScreen.SetActive(false);
         statusTextObject.SetActive(false);
 
@@ -110,5 +144,33 @@ public class BarnMechanic : MonoBehaviour
         // Oyuncunun köpek kulübesine olan mesafesini kontrol eder
         float distanceToDogHouse = Vector3.Distance(player.transform.position, dogHouseTrigger.position);
         return distanceToDogHouse <= interactionRange;
+    }
+
+    private void ShowRestPanel()
+    {
+        restPanel.SetActive(true);
+        sheepMissingPanel.SetActive(false);
+        alreadyRestedPanel.SetActive(false);
+    }
+
+    private void ShowSheepMissingPanel()
+    {
+        sheepMissingPanel.SetActive(true);
+        restPanel.SetActive(false);
+        alreadyRestedPanel.SetActive(false);
+    }
+
+    private void ShowAlreadyRestedPanel()
+    {
+        alreadyRestedPanel.SetActive(true);
+        restPanel.SetActive(false);
+        sheepMissingPanel.SetActive(false);
+    }
+
+    private void CloseAllPanels()
+    {
+        restPanel.SetActive(false);
+        sheepMissingPanel.SetActive(false);
+        alreadyRestedPanel.SetActive(false);
     }
 }
