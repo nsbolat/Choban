@@ -12,7 +12,6 @@ public class Car_AI : MonoBehaviour
 
     public GameObject trafficLight; 
     private TrafficLightController trafficLightController; 
-    
 
     private bool isNearTrafficLight = false; 
 
@@ -75,7 +74,7 @@ public class Car_AI : MonoBehaviour
     }
 
     
-    private void OnTriggerStay(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("TrafficLightTrigger"))
         {
@@ -90,14 +89,5 @@ public class Car_AI : MonoBehaviour
             isNearTrafficLight = false; 
         }
     }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("Köpek")) // Köpekle çarpışma
-        {
-            // Köpek ile çarpışmayı engelle
-            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
-
-            Debug.Log("Araba köpek ile çarpıştı ama etkilenmedi!");
-        }
-    }
+    
 }

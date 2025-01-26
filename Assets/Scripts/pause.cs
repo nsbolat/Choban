@@ -32,7 +32,7 @@ public class pause : MonoBehaviour
     {
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f;
-        worldTimeScript.ResumeTime(); // Zamanï¿½ devam ettir
+        worldTimeScript.ResumeTime(); // Zamaný devam ettir
         isPaused = false;
     }
 
@@ -40,11 +40,11 @@ public class pause : MonoBehaviour
     {
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f;
-        worldTimeScript.PauseTime(); // Zamanï¿½ durdur
+        worldTimeScript.PauseTime(); // Zamaný durdur
         isPaused = true;
     }
 
-    public void mandon()
+    public void maýndon()
     {
         SceneManager.LoadScene(0);
     }
@@ -53,7 +53,7 @@ public class pause : MonoBehaviour
     {
         SceneManager.LoadScene(2);
     }
-    public void cik()
+    public void cýk()
     {
         Application.Quit();
     }

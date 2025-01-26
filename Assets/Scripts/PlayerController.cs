@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject _infoObject; // Hedef işareti
     [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
     [SerializeField] private GameObject kemik; // Zemin Layer'ı
-    [SerializeField] private GameObject gameOverPanel;
+
 
     [Header("Movement")]
     [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
@@ -56,10 +56,6 @@ public class PlayerController : MonoBehaviour
     private void Start()
     {
         kemik.SetActive(false);
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(false); // Başlangıçta panel kapalı
-        }
     }
 
     private void Update()
@@ -233,15 +229,4 @@ public class PlayerController : MonoBehaviour
             Destroy(other.gameObject); // Kemik yok edilir
         }
     }     
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("car")) // Araba ile çarpışma
-        {
-            // Araba ile çarpışmayı engelle
-            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
-
-            Debug.Log("Köpek araba ile çarpıştı ama etkilenmedi!");
-        }
-    }
 }
-
