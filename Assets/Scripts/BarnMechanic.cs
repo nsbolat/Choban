@@ -3,6 +3,7 @@ using System.Collections;
 using UnityEngine;
 using TMPro;
 using WorldTime;
+using System.Collections.Generic;
 
 public class BarnMechanic : MonoBehaviour
 {
@@ -20,13 +21,11 @@ public class BarnMechanic : MonoBehaviour
 
     private bool isResting = false;
     private bool isPlayerInBarn = false;
-    private int sheepInBarnCount = 0;
-    private int totalSheepCount = 0;
+    private HashSet<GameObject> sheepInBarn = new HashSet<GameObject>(); // Ahırdaki koyunlar
     private int lastRestedDay = -1; // En son dinlenilen günü takip eder (-1: hiç dinlenilmedi)
 
     private void Start()
     {
-        totalSheepCount = GameObject.FindGameObjectsWithTag("Koyun").Length; // Toplam koyun sayısını belirle
         UpdateDayCounter();
         worldTime.OnDayChanged += OnDayChanged; // Gün değişim event'ine abone ol
         restPanel.SetActive(false); // Paneller başlangıçta kapalı
@@ -39,7 +38,7 @@ public class BarnMechanic : MonoBehaviour
         worldTime.OnDayChanged -= OnDayChanged; // Aboneliği kaldır
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Köpek"))
         {
@@ -48,11 +47,11 @@ public class BarnMechanic : MonoBehaviour
 
         if (other.CompareTag("Koyun"))
         {
-            sheepInBarnCount++;
+            sheepInBarn.Add(other.gameObject); // Koyunu listeye ekle
         }
     }
 
-    void OnTriggerExit(Collider other)
+    private void OnTriggerExit(Collider other)
     {
         if (isResting) return;
 
@@ -64,7 +63,7 @@ public class BarnMechanic : MonoBehaviour
 
         if (other.CompareTag("Koyun"))
         {
-            sheepInBarnCount--;
+            sheepInBarn.Remove(other.gameObject); // Koyunu listeden çıkar
         }
     }
 
@@ -75,7 +74,7 @@ public class BarnMechanic : MonoBehaviour
         // Köpek kulübesine yakınlık ve etkileşim kontrolü
         if (IsNearDogHouse())
         {
-            if (sheepInBarnCount == totalSheepCount)
+            if (sheepInBarn.Count == GameObject.FindGameObjectsWithTag("Koyun").Length) // Ahırdaki ve toplam koyun sayısını karşılaştır
             {
                 if (lastRestedDay == currentDay)
                 {
@@ -117,7 +116,7 @@ public class BarnMechanic : MonoBehaviour
         dayCounterText.gameObject.SetActive(false);
 
         yield return new WaitForSeconds(fadeDuration);
-
+        AddSheepToBarn(5);
         fadeScreen.SetActive(false);
         statusTextObject.SetActive(false);
 
@@ -127,6 +126,33 @@ public class BarnMechanic : MonoBehaviour
         dayCounterText.gameObject.SetActive(true);
 
         isResting = false;
+    }
+
+    private void AddSheepToBarn(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
+            if (SheepManager.Instance != null)
+            {
+                GameObject newSheepPrefab = Instantiate(
+                    SheepManager.Instance.sheepList[0].gameObject, // Mevcut bir koyun prefab'ını baz al
+                    SheepManager.Instance.target.position + new Vector3(UnityEngine.Random.Range(-2f, 2f), 0, UnityEngine.Random.Range(-2f, 2f)),
+                    Quaternion.identity
+                );
+
+                Sheep newSheep = newSheepPrefab.GetComponent<Sheep>();
+                if (newSheep != null)
+                {
+                    SheepManager.Instance.AddSheep(newSheep); // Yeni koyunu sürüye ekle
+                    sheepInBarn.Add(newSheep.gameObject); // Yeni koyunu ahır listesine ekle
+                    Debug.Log("Ahıra yeni bir koyun eklendi.");
+                }
+            }
+            else
+            {
+                Debug.LogError("SheepManager bulunamadı!");
+            }
+        }
     }
 
     private void OnDayChanged(int newDay)

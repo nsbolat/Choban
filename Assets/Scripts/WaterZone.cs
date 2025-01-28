@@ -10,7 +10,7 @@ public class WaterZone : MonoBehaviour
     private int totalSheep = 0;
     private SurvivalSystem survivalSystem;
     [SerializeField] SheepManager _sheepManager;
-    private bool hasLoggedMessage = false; // Mesajýn yazýlýp yazýlmadýðýný takip eden deðiþken
+    private bool hasLoggedMessage = false; // Mesajï¿½n yazï¿½lï¿½p yazï¿½lmadï¿½ï¿½ï¿½nï¿½ takip eden deiken
     void Start()
     {
         survivalSystem = FindObjectOfType<SurvivalSystem>();
@@ -40,7 +40,7 @@ public class WaterZone : MonoBehaviour
        
         if (isWatering)
         {
-            // Sadece susuzluk barýný artýr
+            // Sadece susuzluk barï¿½nï¿½ artï¿½r
             if ( survivalSystem.currentThirst != 101)
             {
                 float thirstIncreaseAmount = Time.deltaTime * 10;
@@ -49,7 +49,7 @@ public class WaterZone : MonoBehaviour
                 survivalSystem.UpdateSliders();
             }
 
-            // Susuzluk 100 olduðunda su içme iþlemini durdur
+            // Susuzluk 100 olduï¿½unda su iï¿½me iï¿½lemini durdur
             if (survivalSystem.currentThirst == 150)
             {
                 StopWatering();
@@ -62,15 +62,15 @@ public class WaterZone : MonoBehaviour
         if (totalSheep == _sheepManager.sheepList.Count)
         {
             StartWatering();
-            hasLoggedMessage = false; // Tüm koyunlar alana girdiðinde mesajý sýfýrla
+            hasLoggedMessage = false; // Tï¿½m koyunlar alana girdiï¿½inde mesajï¿½ sï¿½fï¿½rla
         }
         else
         {
             StopWatering();
             if (!hasLoggedMessage)
             {
-                Debug.Log("Tüm koyunlar alanda deðil!");
-                hasLoggedMessage = true; // Mesajý yazdýrdýktan sonra true yap
+                Debug.Log("Tm koyunlar alanda deil!");
+                hasLoggedMessage = true; // Mesajï¿½ yazdï¿½rdï¿½ktan sonra true yap
             }
         }
     }
