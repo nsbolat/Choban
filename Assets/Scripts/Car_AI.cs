@@ -3,18 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEditor.PackageManager;
 using UnityEngine;
-// + , ; = *
+
 public class Car_AI : MonoBehaviour
 {
     public float safeDistance = 5f; 
     public float carSpeed = 50f;   
-    private float currentSpeed;    
+    private float currentSpeed;
+    public bool isMoving;
+    public GameObject gameoverPanel;
 
     public GameObject trafficLight; 
     private TrafficLightController trafficLightController; 
     
-
     private bool isNearTrafficLight = false; 
+
+    [Header("Tekerlekler")]
+    public Transform frontWheel; // Ön tekerlek
+    public Transform backWheel;  // Arka tekerlek
+    public float wheelRotationSpeed = 500f; // Tekerlek dönüş hızı
 
     private void Start()
     {
@@ -24,6 +30,11 @@ public class Car_AI : MonoBehaviour
         {
             trafficLightController = trafficLight.GetComponent<TrafficLightController>();
         }
+    }
+
+    private void OnEnable()
+    {
+        gameoverPanel = GameObject.Find("GameOver");
     }
 
     private void Update()
@@ -45,13 +56,27 @@ public class Car_AI : MonoBehaviour
         }
         
         transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime);
+        RotateWheels(); // Tekerlekleri döndür
     }
+
+    private void RotateWheels()
+    {
+        if (frontWheel != null)
+        {
+            frontWheel.Rotate(Vector3.back * currentSpeed * wheelRotationSpeed * Time.deltaTime);
+        }
+        if (backWheel != null)
+        {
+            backWheel.Rotate(Vector3.back * currentSpeed * wheelRotationSpeed * Time.deltaTime);
+        }
+    }
+
     private bool IsYellowLight()
     {
-       
         if (trafficLightController == null) return false;
         return trafficLightController.IsYellowLight();
     }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -61,11 +86,14 @@ public class Car_AI : MonoBehaviour
     void Stop()
     {
         currentSpeed = 0f;
+        isMoving = false;
     }
 
     void Move()
     {
         currentSpeed = carSpeed;
+        isMoving = true;
+
     }
 
     private bool IsRedLight()
@@ -74,7 +102,6 @@ public class Car_AI : MonoBehaviour
         return trafficLightController.IsRedLight();
     }
 
-    
     private void OnTriggerStay(Collider other)
     {
         if (other.CompareTag("TrafficLightTrigger"))
@@ -90,12 +117,13 @@ public class Car_AI : MonoBehaviour
             isNearTrafficLight = false; 
         }
     }
+
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("Köpek")) // Köpekle çarpışma
+        if (collision.gameObject.CompareTag("Köpek") && isMoving) // Köpekle çarpışma
         {
-            // Köpek ile çarpışmayı engelle
-            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
+            gameoverPanel.SetActive(true);
+            Time.timeScale = 0f;
 
             Debug.Log("Araba köpek ile çarpıştı ama etkilenmedi!");
         }

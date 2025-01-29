@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Random = UnityEngine.Random;
 using TMPro;
+using UnityEngine.Serialization;
 
 public class SheepManager : MonoBehaviour
 {
@@ -12,7 +13,7 @@ public class SheepManager : MonoBehaviour
     [SerializeField] private RectTransform circleRectTransform; // Daire UI'si için referans
     [SerializeField] private LayerMask groundLayer;
     [SerializeField] private TMP_Text sheepCountText;
-    [SerializeField] private TMP_Text notificationText; // Notification Text
+    [FormerlySerializedAs("notificationText")] [SerializeField] private GameObject kacanKoyunBildirim; // Notification Text
 
     [Header("Values")]
     [SerializeField] private float baseRadius = 2f; // Dairenin yarıçapı
@@ -151,10 +152,9 @@ public class SheepManager : MonoBehaviour
     }
     private void ShowEscapeNotification(string message)
     {
-        if (notificationText != null)
+        if (kacanKoyunBildirim != null)
         {
-            notificationText.text = message;  // Bildirim metni ayarla
-            notificationText.gameObject.SetActive(true);  // UI'yi aktif hale getir
+            kacanKoyunBildirim.gameObject.SetActive(true);
 
             // Belirli bir süre sonra metni sıfırla
             Invoke("ClearNotification", 4f);  // 4 saniye sonra bildirimi kaldır
@@ -163,10 +163,9 @@ public class SheepManager : MonoBehaviour
 
     private void ClearNotification()
     {
-        if (notificationText != null)
+        if (kacanKoyunBildirim != null)
         {
-            notificationText.text = "";  // Metni sıfırla
-            notificationText.gameObject.SetActive(false);  // UI'yi pasifleştir
+            kacanKoyunBildirim.gameObject.SetActive(false);  // UI'yi pasifleştir
         }
     }
     public void AddSheep(Sheep newSheep)

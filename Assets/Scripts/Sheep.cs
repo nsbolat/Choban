@@ -9,6 +9,8 @@ public class Sheep : MonoBehaviour
     [SerializeField] private Animator _playerAnim;
     [SerializeField] public bool isEscaped = false;// Koyunun kaçıp kaçmadığını kontrol eder,
     [SerializeField] private SurvivalSystem _survivalSystem;
+    [SerializeField] private GameObject deadSheepPrefab;
+    public float deadbodyTime;
 
 
     void Start()
@@ -87,11 +89,28 @@ public class Sheep : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.CompareTag("car")) // Eğer çarpan obje "Araba" tag'ine sahipse
+        if (collision.gameObject.CompareTag("car") && collision.gameObject.GetComponent<Car_AI>().isMoving) // Eğer çarpan obje "Araba" tag'ine sahipse
         {
             Debug.Log("Koyun arabaya çarptı ve öldü!");
             SheepManager.Instance.RemoveSheep(this); // Koyun sayısını azalt
+            Die();
             Destroy(gameObject); // Koyunu yok et
         }
+    }
+    
+    public void Die()
+    {
+        // Mevcut konum ve rotasyonu kaydet
+        Vector3 deathPosition = transform.position;
+        Quaternion deathRotation = transform.rotation;
+
+        // Ölü koyunu oluştur
+        GameObject deadSheep = Instantiate(deadSheepPrefab, deathPosition, deathRotation);
+
+        // Ölü koyunu belirli bir süre sonra yok et
+        Destroy(deadSheep, deadbodyTime);
+
+        // Canlı koyunu yok et
+        Destroy(gameObject);
     }
 }
