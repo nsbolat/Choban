@@ -13,7 +13,9 @@ public class FoodZone : MonoBehaviour
     [SerializeField] private GameObject noEatGrass, eatedGrass;
     private WorldTime.WorldTime worldTime;
     private int daysSinceEmpty = 0;
-
+    [SerializeField] private GameObject AcKoyunPaneli; // AcKoyunPaneli için referans
+    [SerializeField] private TMPro.TextMeshProUGUI akBasari;
+    private static bool hasShownFeedPanel = false;  // Panelin gösterilip gösterilmediğini takip eden değişken
     void Start()
     {
         noEatGrass.gameObject.SetActive(true);
@@ -29,8 +31,9 @@ public class FoodZone : MonoBehaviour
         {
             worldTime.OnDayChanged += OnDayChanged; // OnDayChanged olayını dinleyin
         }
+       AcKoyunPaneli.SetActive(false); // Paneli başlangıçta gizle
     }
-
+    
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Koyun"))
@@ -75,6 +78,11 @@ public class FoodZone : MonoBehaviour
         {
             StartFeeding();
             hasLoggedMessage = false; // Tüm koyunlar alana girdiğinde mesajı sıfırla
+            if (!hasShownFeedPanel) // Eğer panel daha önce gösterilmediyse
+            {
+                ShowAcKoyunPaneli(); // İlk kez tüm koyunlar alanda, paneli göster
+                hasShownFeedPanel = true; // Panelin gösterildiğini kaydet
+            }
         }
         else
         {
@@ -103,7 +111,22 @@ public class FoodZone : MonoBehaviour
         }
     }
 
-    
+    void ShowAcKoyunPaneli()
+    {
+        if (AcKoyunPaneli != null)
+        {
+            AcKoyunPaneli.SetActive(true); // Paneli aktif et
+            Invoke("HideAcKoyunPaneli", 4f); // 4 saniye sonra paneli gizle
+        }
+    }
+    void HideAcKoyunPaneli()
+    {
+        if (AcKoyunPaneli != null)
+        {
+            AcKoyunPaneli.SetActive(false); // Paneli pasifleştir
+        }
+    }
+
      void StartFeeding()
     {
         isFeeding = true;

@@ -94,5 +94,4 @@ public class Sheep : MonoBehaviour
             Destroy(gameObject); // Koyunu yok et
         }
     }
-    
 }

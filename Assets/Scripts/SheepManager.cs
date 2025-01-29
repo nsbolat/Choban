@@ -29,23 +29,27 @@ public class SheepManager : MonoBehaviour
 
     //UI
     [SerializeField] private GameObject gameOverPanel;
-
-
+    private bool isFirstSheepRejoin = true; // İlk kez koyun geri döndüğünü kontrol edecek flag
+    [SerializeField] private GameObject SuruBuyuyorPanel; // Sürü Büyüyor paneli için referans
+    [SerializeField] private TMPro.TextMeshProUGUI SuruBasari; // Başarı yazısı
     public static SheepManager Instance { get; private set; } // Singleton
 
     private void Awake()
     {
+        // Singleton kontrolü
         if (Instance == null)
         {
-            Instance = this;
+            Instance = this; // Eğer Instance null ise kendisini atar
         }
         else
         {
-            Destroy(gameObject);
+            Destroy(gameObject); // Eğer Instance zaten varsa, bu objeyi yok eder
         }
-        if (notificationText != null)
+
+        // Burada da konsol mesajı ile kontrol edebiliriz
+        if (Instance == this)
         {
-            notificationText.gameObject.SetActive(false);  // Başlangıçta kapalı yap
+            Debug.Log("Barking singleton instance'ı oluşturuldu.");
         }
     }
 
@@ -216,10 +220,19 @@ public class SheepManager : MonoBehaviour
             gameOverPanel.SetActive(true); 
             Debug.Log("Oyun Bitti! Tüm koyunlar kaybedildi.");
         }
-
-
+        if (sheepList.Count >= 30 && SuruBuyuyorPanel != null)
+        {
+            SuruBuyuyorPanel.SetActive(true);
+            Invoke("HideSuruBuyuyorPanel", 4f);
+        }
     }
-
+    private void HideSuruBuyuyorPanel()
+    {
+        if (SuruBuyuyorPanel != null)
+        {
+            SuruBuyuyorPanel.SetActive(false);
+        }
+    }
     void UpdateCircleSize()
     {
         if (circleRectTransform != null)
@@ -235,12 +248,24 @@ public class SheepManager : MonoBehaviour
     }
     public void RejoinEscapedSheep()
     {
+        bool anySheepRejoined = false; // Geri dönen koyun olup olmadığını kontrol etmek için
         for (int i = escapedSheepList.Count - 1; i >= 0; i--)
         {
             Sheep escapedSheep = escapedSheepList[i];
             AddSheep(escapedSheep); // Kaçan koyunu sürüye geri ekle
             escapedSheep.MoveToPosition(target.position); // Hedefe doğru hareket ettir
             Debug.Log("Kaçan koyun sürüye geri döndü!");
+            anySheepRejoined = true; // Geri dönen koyun var
+        }
+        // İlk kez geri dönen koyun olduğunda sadece bir kez bu paneli aktif et
+        if (anySheepRejoined)
+        {
+            if (isFirstSheepRejoin && Barking.Instance != null)
+            {
+                Debug.Log("İlk koyun geri döndü, başarı paneli açılıyor.");
+                Barking.Instance.ShowBasariPanel(); // Başarı panelini göster
+                isFirstSheepRejoin = false; // Sonraki geri dönüşlerde paneli gösterme
+            }
         }
     }
     public void DecreaseSheepCount()

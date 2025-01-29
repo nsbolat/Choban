@@ -17,7 +17,12 @@ public class Barking : MonoBehaviour
     private float eCooldown = 0f; // E tuşu bekleme süresi
     private float qCooldownDuration = 3f; // Q için cooldown süresi
     private float eCooldownDuration = 5f; // E için cooldown süresi
-
+    [SerializeField] private GameObject KurtBasariPanel; // Başarı paneli
+    [SerializeField] private TMPro.TextMeshProUGUI KurtBasari; // Başarı yazısı
+    private bool isFirstWolfEscape = true; // İlk kez tetiklenmesi için
+    [SerializeField] private GameObject KoyunBasariPanel; // Başarı paneli
+    [SerializeField] private TMPro.TextMeshProUGUI KoyunBasari; // Başarı yazısı
+    public static Barking Instance { get; private set; } // Singleton Instanc
     private void Start()
     {
         // AudioSource referansını al
@@ -27,8 +32,24 @@ public class Barking : MonoBehaviour
         }
 
         _playerAnim = GameObject.FindWithTag("Köpek").GetComponent<Animator>();
+        // Başlangıçta paneli kapalı yap
+        if (KurtBasariPanel != null)
+        {
+            KurtBasariPanel.SetActive(false);
+        }
     }
-
+    private void Awake()
+    {
+        // Singleton kontrolü
+        if (Instance == null)
+        {
+            Instance = this; // Eğer Instance null ise kendisini atar
+        }
+        else
+        {
+            Destroy(gameObject); // Eğer Instance zaten varsa, bu objeyi yok eder
+        }
+    }
     private void Update()
     {
         // Cooldown sürelerini azalt
@@ -80,6 +101,30 @@ public class Barking : MonoBehaviour
             audioSource.PlayOneShot(randomBark);
         }
     }
+    public void OnWolfEscape()
+    {
+        if (isFirstWolfEscape) // Eğer ilk kez kaçıyorsa paneli aç
+        {
+            if (KurtBasariPanel && KurtBasari!= null)
+            {
+                KurtBasariPanel.SetActive(true);
+            }
+            Debug.Log("İlk kurt kaçtı, başarı paneli açıldı.");
+            isFirstWolfEscape = false; // Sonraki çağrılarda tekrar açılmasın
+            StartCoroutine(HideSuccessPanel());
+        }
+    }
+    private IEnumerator HideSuccessPanel()
+    {
+        yield return new WaitForSeconds(4f);
+
+        if (KurtBasariPanel != null)
+        {
+            KurtBasariPanel.SetActive(false);
+        }
+
+        Debug.Log("Başarı paneli 4 saniye sonra kapatıldı.");
+    }
 
     public void PlayBarkWolfSound()
     {
@@ -94,5 +139,27 @@ public class Barking : MonoBehaviour
             // PlayOneShot ile ses çal
             audioSource.PlayOneShot(randomBark);
         }
+    }
+    public void ShowBasariPanel()
+    {
+        if (KoyunBasariPanel != null && KoyunBasari != null)
+        {
+            KoyunBasariPanel.SetActive(true); // Paneli aktif et
+
+            // 4 saniye sonra paneli gizle
+            StartCoroutine(HideBasariPanel());
+        }
+    }
+
+    private IEnumerator HideBasariPanel()
+    {
+        yield return new WaitForSeconds(4f); // 4 saniye bekle
+
+        if (KoyunBasariPanel != null)
+        {
+            KoyunBasariPanel.SetActive(false); // Paneli gizle
+        }
+
+        Debug.Log("Başarı paneli 4 saniye sonra kapatıldı.");
     }
 }

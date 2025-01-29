@@ -151,6 +151,8 @@ public class Wolf : MonoBehaviour
         navAgent.SetDestination(initialSpawnPosition); // Go back to the spawn point
         Debug.Log("Kurt kaçarken spawn noktasına dönüyor.");
         StartCoroutine(DestroyAfterEscape()); // Destroy after reaching spawn point
+        Barking barking = FindObjectOfType<Barking>();
+        
     }
 
     private IEnumerator DestroyAfterEscape()
@@ -159,7 +161,11 @@ public class Wolf : MonoBehaviour
         {
             yield return null;
         }
-
+        Barking barking = FindObjectOfType<Barking>();
+        if (barking != null)
+        {
+            barking.OnWolfEscape();
+        }
         Debug.Log("Kurt saldırdıktan sonra kaçtı ve yok oldu.");
         Destroy(gameObject); // Destroy the wolf after it escapes
     }
@@ -175,6 +181,7 @@ public class Wolf : MonoBehaviour
         );
         navAgent.SetDestination(randomEscapePosition); // Kaçış noktası belirle
         Debug.Log("Kurt kaçışa yönlendirildi.");
+        
         StartCoroutine(DestroyAfterEscape()); // Kaçış noktasına ulaştığında yok ol
     }
 }

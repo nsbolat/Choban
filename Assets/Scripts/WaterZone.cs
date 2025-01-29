@@ -11,11 +11,16 @@ public class WaterZone : MonoBehaviour
     private SurvivalSystem survivalSystem;
     [SerializeField] SheepManager _sheepManager;
     private bool hasLoggedMessage = false; // Mesaj�n yaz�l�p yaz�lmad���n� takip eden deiken
+    [SerializeField] private GameObject SusuzKoyunPaneli; // AcKoyunPaneli için referans
+    [SerializeField] private TMPro.TextMeshProUGUI suBasari;
+    
+    // Static değişken: Panelin gösterilip gösterilmediğini kontrol eder
+    private static bool hasShownWaterPanel = false; 
     void Start()
     {
         survivalSystem = FindObjectOfType<SurvivalSystem>();
         _sheepManager = FindObjectOfType<SheepManager>();
-      
+        SusuzKoyunPaneli.SetActive(false); // Paneli başlangıçta gizle
     }
     void OnTriggerEnter(Collider other)
     {
@@ -63,6 +68,12 @@ public class WaterZone : MonoBehaviour
         {
             StartWatering();
             hasLoggedMessage = false; // T�m koyunlar alana girdi�inde mesaj� s�f�rla
+            // Eğer panel daha önce gösterilmediyse ve global olarak gösterilmemişse
+            if (!hasShownWaterPanel)
+            {
+                ShowSusuzKoyunPaneli(); // İlk kez tüm koyunlar alanda, paneli göster
+                hasShownWaterPanel = true; // Panelin gösterildiğini kaydet
+            }
         }
         else
         {
@@ -74,7 +85,22 @@ public class WaterZone : MonoBehaviour
             }
         }
     }
+    void ShowSusuzKoyunPaneli()
+    {
+        if (SusuzKoyunPaneli != null)
+        {
+            SusuzKoyunPaneli.SetActive(true); // Paneli aktif et
+            Invoke("HideSusuzKoyunPaneli", 4f); // 4 saniye sonra paneli gizle
+        }
+    }
 
+    void HideSusuzKoyunPaneli()
+    {
+        if (SusuzKoyunPaneli != null)
+        {
+            SusuzKoyunPaneli.SetActive(false); // Paneli pasifleştir
+        }
+    }
     void StartWatering()
     {
         isWatering = true;
