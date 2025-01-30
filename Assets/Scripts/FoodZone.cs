@@ -14,7 +14,6 @@ public class FoodZone : MonoBehaviour
     private WorldTime.WorldTime worldTime;
     private int daysSinceEmpty = 0;
     [SerializeField] private GameObject AcKoyunPaneli; // AcKoyunPaneli için referans
-    [SerializeField] private TMPro.TextMeshProUGUI akBasari;
     private static bool hasShownFeedPanel = false;  // Panelin gösterilip gösterilmediğini takip eden değişken
     void Start()
     {

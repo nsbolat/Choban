@@ -18,10 +18,8 @@ public class Barking : MonoBehaviour
     private float qCooldownDuration = 3f; // Q için cooldown süresi
     private float eCooldownDuration = 5f; // E için cooldown süresi
     [SerializeField] private GameObject KurtBasariPanel; // Başarı paneli
-    [SerializeField] private TMPro.TextMeshProUGUI KurtBasari; // Başarı yazısı
     private bool isFirstWolfEscape = true; // İlk kez tetiklenmesi için
     [SerializeField] private GameObject KoyunBasariPanel; // Başarı paneli
-    [SerializeField] private TMPro.TextMeshProUGUI KoyunBasari; // Başarı yazısı
     public static Barking Instance { get; private set; } // Singleton Instanc
     private void Start()
     {
@@ -105,7 +103,7 @@ public class Barking : MonoBehaviour
     {
         if (isFirstWolfEscape) // Eğer ilk kez kaçıyorsa paneli aç
         {
-            if (KurtBasariPanel && KurtBasari!= null)
+            if (KurtBasariPanel)
             {
                 KurtBasariPanel.SetActive(true);
             }
@@ -142,7 +140,7 @@ public class Barking : MonoBehaviour
     }
     public void ShowBasariPanel()
     {
-        if (KoyunBasariPanel != null && KoyunBasari != null)
+        if (KoyunBasariPanel != null)
         {
             KoyunBasariPanel.SetActive(true); // Paneli aktif et
 

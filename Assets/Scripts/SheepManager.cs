@@ -32,7 +32,6 @@ public class SheepManager : MonoBehaviour
     [SerializeField] private GameObject gameOverPanel;
     private bool isFirstSheepRejoin = true; // İlk kez koyun geri döndüğünü kontrol edecek flag
     [SerializeField] private GameObject SuruBuyuyorPanel; // Sürü Büyüyor paneli için referans
-    [SerializeField] private TMPro.TextMeshProUGUI SuruBasari; // Başarı yazısı
     
     [Header("Sheep Prefab")]
     [SerializeField] private GameObject sheepPrefab; // Yeni koyun prefab'ı
