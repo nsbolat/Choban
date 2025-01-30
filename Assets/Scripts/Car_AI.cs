@@ -1,7 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor.PackageManager;
 using UnityEngine;
 
 public class Car_AI : MonoBehaviour
@@ -30,10 +26,6 @@ public class Car_AI : MonoBehaviour
         {
             trafficLightController = trafficLight.GetComponent<TrafficLightController>();
         }
-    }
-
-    private void OnEnable()
-    {
         gameoverPanel = GameObject.Find("GameOver");
     }
 

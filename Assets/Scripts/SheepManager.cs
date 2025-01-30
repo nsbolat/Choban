@@ -33,6 +33,9 @@ public class SheepManager : MonoBehaviour
     private bool isFirstSheepRejoin = true; // İlk kez koyun geri döndüğünü kontrol edecek flag
     [SerializeField] private GameObject SuruBuyuyorPanel; // Sürü Büyüyor paneli için referans
     [SerializeField] private TMPro.TextMeshProUGUI SuruBasari; // Başarı yazısı
+    
+    [Header("Sheep Prefab")]
+    [SerializeField] private GameObject sheepPrefab; // Yeni koyun prefab'ı
     public static SheepManager Instance { get; private set; } // Singleton
 
     private void Awake()
@@ -70,6 +73,7 @@ public class SheepManager : MonoBehaviour
         UpdateBaseRadius();
         UpdateCircleSize();
         ArrangeSheepInCircle();
+        
 
         // Kaçma kontrolünü belirli bir sıklıkla çağır
         InvokeRepeating(nameof(CheckForEscape), escapeInterval, escapeInterval); // Her 'escapeInterval' saniyede bir kontrol et
@@ -82,6 +86,30 @@ public class SheepManager : MonoBehaviour
     private void Update()
     {
         HandleRightClickTargetChange();
+        if (Input.GetKeyDown(KeyCode.KeypadPlus))
+        {
+            SpawnNewSheep();
+        }
+    }
+    
+    private void SpawnNewSheep()
+    {
+        if (sheepPrefab != null && target != null) // Eğer prefab ve hedef varsa
+        {
+            Vector3 spawnPosition = target.position + new Vector3(Random.Range(-2f, 2f), 0, Random.Range(-2f, 2f)); // Hedefin yakınına koyun spawnla
+            GameObject newSheepObject = Instantiate(sheepPrefab, spawnPosition, Quaternion.identity);
+            Sheep newSheep = newSheepObject.GetComponent<Sheep>();
+
+            if (newSheep != null)
+            {
+                AddSheep(newSheep); // Yeni koyunu sürüye ekle
+                newSheep.FollowTarget(target.position); // Hedefe yönlendir
+            }
+        }
+        else
+        {
+            Debug.LogWarning("Sheep prefab veya hedef eksik!");
+        }
     }
     
     private void HandleRightClickTargetChange()
@@ -110,7 +138,7 @@ public class SheepManager : MonoBehaviour
         UpdateCircleSize(); // Daireyi yeniden boyutlandır
 
         // Çevreyi 360 derece olarak kabul ederek her koyun için bir açı hesapla
-        for (int i = 0; i < sheepList.Count; i++)
+        for (int i = 0; i < sheepList.Count; i++) // Burada <= değil < olmalı çünkü index sıfırdan başlar
         {
             // Koyunun her biri için rastgele bir açı belirle
             float angle = (360f / sheepList.Count) * i; // Her koyunun farklı bir açısı olacak
@@ -150,6 +178,7 @@ public class SheepManager : MonoBehaviour
             ShowEscapeNotification("Bir koyun kaçıyor!"); // Bildirimi göster
         }
     }
+
     private void ShowEscapeNotification(string message)
     {
         if (kacanKoyunBildirim != null)
@@ -168,6 +197,7 @@ public class SheepManager : MonoBehaviour
             kacanKoyunBildirim.gameObject.SetActive(false);  // UI'yi pasifleştir
         }
     }
+
     public void AddSheep(Sheep newSheep)
     {
         if (!sheepList.Contains(newSheep))
@@ -210,9 +240,8 @@ public class SheepManager : MonoBehaviour
     {
         if (sheepCountText != null)
         {
-            sheepCountText.text =sheepList.Count.ToString();
+            sheepCountText.text = sheepList.Count.ToString();
         }
-
 
         if (sheepList.Count == 0)
         {
@@ -225,6 +254,7 @@ public class SheepManager : MonoBehaviour
             Invoke("HideSuruBuyuyorPanel", 4f);
         }
     }
+
     private void HideSuruBuyuyorPanel()
     {
         if (SuruBuyuyorPanel != null)
@@ -232,6 +262,7 @@ public class SheepManager : MonoBehaviour
             SuruBuyuyorPanel.SetActive(false);
         }
     }
+
     void UpdateCircleSize()
     {
         if (circleRectTransform != null)
@@ -245,6 +276,7 @@ public class SheepManager : MonoBehaviour
     {
         baseRadius = Mathf.Sqrt(sheepList.Count) * sheepRadius;
     }
+
     public void RejoinEscapedSheep()
     {
         bool anySheepRejoined = false; // Geri dönen koyun olup olmadığını kontrol etmek için
@@ -256,6 +288,7 @@ public class SheepManager : MonoBehaviour
             Debug.Log("Kaçan koyun sürüye geri döndü!");
             anySheepRejoined = true; // Geri dönen koyun var
         }
+
         // İlk kez geri dönen koyun olduğunda sadece bir kez bu paneli aktif et
         if (anySheepRejoined)
         {
@@ -267,14 +300,22 @@ public class SheepManager : MonoBehaviour
             }
         }
     }
-    public void DecreaseSheepCount()
+
+    public void DecreaseSheepCount(bool kurt)
     {
         if (sheepList.Count > 0)
         {
             Sheep sheepToRemove = sheepList[0]; // İlk koyunu al (saldırıya uğrayan)
             sheepList.Remove(sheepToRemove); // Koyunu listeden çıkar
             UpdateSheepCountUI(); // UI'yi güncelle
-            Destroy(sheepToRemove.gameObject); // Koyunu yok et
+            if (kurt)
+            {
+                Destroy(sheepToRemove.gameObject);
+            }
+            else
+            {
+                sheepToRemove.GetComponent<Sheep>().Die();
+            }
             Debug.Log("Bir koyun öldü! Koyun sayısı: " + sheepList.Count);
         }
     }

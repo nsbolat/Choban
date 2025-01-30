@@ -19,6 +19,7 @@ public class Sheep : MonoBehaviour
         _playerAnim = GameObject.FindWithTag("Köpek").GetComponent<Animator>();
         _survivalSystem = FindObjectOfType<SurvivalSystem>();
         navAgent.stoppingDistance = 0.1f;
+        FollowTarget(GameObject.Find("suruTarget").transform.position);
     }
 
     private void FixedUpdate()

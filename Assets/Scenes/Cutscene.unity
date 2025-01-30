@@ -7322,7 +7322,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 264
   sheepCountText: {fileID: 183781924}
-  notificationText: {fileID: 0}
+  kacanKoyunBildirim: {fileID: 0}
   baseRadius: 9
   sheepRadius: 0.65
   escapeChance: 0

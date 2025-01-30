@@ -104,7 +104,7 @@ public class Wolf : MonoBehaviour
         // Koyun sayısını azalt
         if (SheepManager.Instance != null)
         {
-            SheepManager.Instance.DecreaseSheepCount();
+            SheepManager.Instance.DecreaseSheepCount(true);
         }
 
         // Saldırdıktan sonra kaçışa başla

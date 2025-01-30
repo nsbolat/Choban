@@ -2427,7 +2427,7 @@ MonoBehaviour:
   _playerAnim: {fileID: 0}
   isEscaped: 0
   _survivalSystem: {fileID: 0}
-  deadSheepPrefab: {fileID: 3202339046658563027, guid: 8f50ec2ddc8e2ba4b8b09be5ea420e28,
+  deadSheepPrefab: {fileID: 428298874347056385, guid: a293a25617516c143baae717a3004ae4,
     type: 3}
   deadbodyTime: 10
 --- !u!54 &3810695847765770441

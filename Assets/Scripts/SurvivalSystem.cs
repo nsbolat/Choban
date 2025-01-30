@@ -40,6 +40,11 @@ public class SurvivalSystem : MonoBehaviour
 
     private void Update()
     {
+        if (Input.GetKeyDown(KeyCode.P)) // P tuşuna basıldığında çalıştır
+        {
+            DecreaseHunger(20f);
+        }
+        
         if (isFeeding)
         {
             currentHunger += artmaHızıHunger * Time.deltaTime;
@@ -70,7 +75,7 @@ public class SurvivalSystem : MonoBehaviour
             thirstReductionTimer += Time.deltaTime;
             if (thirstReductionTimer >= sheepReductionInterval)
             {
-                SheepManager.Instance.DecreaseSheepCount();
+                SheepManager.Instance.DecreaseSheepCount(false);
                 thirstReductionTimer = 0f;
             }
         }
@@ -84,7 +89,7 @@ public class SurvivalSystem : MonoBehaviour
             hungerReductionTimer += Time.deltaTime;
             if (hungerReductionTimer >= sheepReductionInterval)
             {
-                SheepManager.Instance.DecreaseSheepCount();
+                SheepManager.Instance.DecreaseSheepCount(false);
                 hungerReductionTimer = 0f;
             }
         }
@@ -93,6 +98,13 @@ public class SurvivalSystem : MonoBehaviour
             hungerReductionTimer = 0f;
         }
 
+        UpdateSliders();
+    }
+    
+    public void DecreaseHunger(float amount)
+    {
+        currentHunger -= amount;
+        currentHunger = Mathf.Clamp(currentHunger, 0, maxHunger);
         UpdateSliders();
     }
 
