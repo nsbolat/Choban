@@ -17,11 +17,7 @@ public class Barking : MonoBehaviour
     private float eCooldown = 0f; // E tuşu bekleme süresi
     private float qCooldownDuration = 3f; // Q için cooldown süresi
     private float eCooldownDuration = 5f; // E için cooldown süresi
-    [SerializeField] private GameObject KurtBasariPanel; // Başarı paneli
-    [SerializeField] private TMPro.TextMeshProUGUI KurtBasari; // Başarı yazısı
-    private bool isFirstWolfEscape = true; // İlk kez tetiklenmesi için
-    [SerializeField] private GameObject KoyunBasariPanel; // Başarı paneli
-    [SerializeField] private TMPro.TextMeshProUGUI KoyunBasari; // Başarı yazısı
+
     public static Barking Instance { get; private set; } // Singleton Instanc
     private void Start()
     {
@@ -32,11 +28,7 @@ public class Barking : MonoBehaviour
         }
 
         _playerAnim = GameObject.FindWithTag("Köpek").GetComponent<Animator>();
-        // Başlangıçta paneli kapalı yap
-        if (KurtBasariPanel != null)
-        {
-            KurtBasariPanel.SetActive(false);
-        }
+
     }
     private void Awake()
     {
@@ -69,7 +61,7 @@ public class Barking : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E) && eCooldown <= 0)
         {
             _playerAnim.SetTrigger("Havla");
-            SheepManager.Instance.RejoinEscapedSheep(); // Kaçan koyunları geri getir
+            //SheepManager.Instance.RejoinEscapedSheep(); // Kaçan koyunları geri getir
             eCooldown = eCooldownDuration; // E tuşu cooldown başlat
             eCooldownImage.fillAmount = 0; // E tuşu görselini sıfırla
             Debug.Log("E tuşu kullanıldı. Cooldown başladı: " + eCooldownDuration + " saniye.");
@@ -79,7 +71,7 @@ public class Barking : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Q) && qCooldown <= 0)
         {
             _playerAnim.SetTrigger("Havla2");
-            WolfSpawner.Instance.SendNearbyWolvesToEscapePoint(); // Yakındaki kurtları kaçışa gönder
+            //WolfSpawner.Instance.SendNearbyWolvesToEscapePoint(); // Yakındaki kurtları kaçışa gönder
             qCooldown = qCooldownDuration; // Q tuşu cooldown başlat
             qCooldownImage.fillAmount = 0; // Q tuşu görselini sıfırla
             Debug.Log("Q tuşu kullanıldı. Cooldown başladı: " + qCooldownDuration + " saniye.");
@@ -101,30 +93,6 @@ public class Barking : MonoBehaviour
             audioSource.PlayOneShot(randomBark);
         }
     }
-    public void OnWolfEscape()
-    {
-        if (isFirstWolfEscape) // Eğer ilk kez kaçıyorsa paneli aç
-        {
-            if (KurtBasariPanel && KurtBasari!= null)
-            {
-                KurtBasariPanel.SetActive(true);
-            }
-            Debug.Log("İlk kurt kaçtı, başarı paneli açıldı.");
-            isFirstWolfEscape = false; // Sonraki çağrılarda tekrar açılmasın
-            StartCoroutine(HideSuccessPanel());
-        }
-    }
-    private IEnumerator HideSuccessPanel()
-    {
-        yield return new WaitForSeconds(4f);
-
-        if (KurtBasariPanel != null)
-        {
-            KurtBasariPanel.SetActive(false);
-        }
-
-        Debug.Log("Başarı paneli 4 saniye sonra kapatıldı.");
-    }
 
     public void PlayBarkWolfSound()
     {
@@ -139,27 +107,5 @@ public class Barking : MonoBehaviour
             // PlayOneShot ile ses çal
             audioSource.PlayOneShot(randomBark);
         }
-    }
-    public void ShowBasariPanel()
-    {
-        if (KoyunBasariPanel != null && KoyunBasari != null)
-        {
-            KoyunBasariPanel.SetActive(true); // Paneli aktif et
-
-            // 4 saniye sonra paneli gizle
-            StartCoroutine(HideBasariPanel());
-        }
-    }
-
-    private IEnumerator HideBasariPanel()
-    {
-        yield return new WaitForSeconds(4f); // 4 saniye bekle
-
-        if (KoyunBasariPanel != null)
-        {
-            KoyunBasariPanel.SetActive(false); // Paneli gizle
-        }
-
-        Debug.Log("Başarı paneli 4 saniye sonra kapatıldı.");
     }
 }

@@ -5,51 +5,63 @@ using System.Collections;
 public class PlayerController : MonoBehaviour
 {
     [Header("References")]
-    [SerializeField] private Rigidbody playerRigidbody; // Oyuncu Rigidbody
-    [SerializeField] private Animator playerAnimator; // Animator bileşeni
-    [SerializeField] private Transform groundCheck; // Zemin kontrol noktası
-    [SerializeField] private GameObject _infoObject; // Hedef işareti
-    [SerializeField] private LayerMask groundLayer; // Zemin Layer'ı
-    [SerializeField] private GameObject kemik; // Zemin Layer'ı
+    [SerializeField] private Rigidbody playerRigidbody;
+    [SerializeField] private Animator playerAnimator;
+    [SerializeField] private Transform groundCheck;
+    [SerializeField] private LayerMask groundLayer;
+    [SerializeField] private GameObject kemik;
     [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Transform headIKTarget;
 
     [Header("Movement")]
-    [SerializeField] private float maxMoveSpeed = 5f; // Maksimum hız
-    [SerializeField] private float acceleration = 2f; // Hızlanma
-    [SerializeField] private float deceleration = 5f; // Yavaşlama
-    [SerializeField] private float sprintMultiplier = 1.5f; // Sprint çarpanı
-    [SerializeField] private AnimationCurve rotationSpeedCurve; // Rotasyon eğrisi
-    [SerializeField] private float rotationTime = 1f; // Rotasyon süresi
-    [SerializeField] private float jumpForce = 5f; // Zıplama gücü
-    [SerializeField] private float gravityScale = 2f; // Yerçekimi çarpanı
-    [SerializeField] private float groundCheckRadius = 0.2f; // Zemin kontrol yarıçapı
-    [SerializeField] private float jumpCooldown = 0.5f; // Zıplama cooldown süresi
+    [SerializeField] private float maxMoveSpeed = 5f;
+    [SerializeField] private float acceleration = 10f;
+    [SerializeField] private float deceleration = 10f;
+    [SerializeField] private float sprintMultiplier = 1.5f;
+    [SerializeField] private float rotationSpeed = 12f;
+    [SerializeField] private float jumpForce = 5f;
+    [SerializeField] private float gravityScale = 2f;
+    [SerializeField] private float groundCheckRadius = 0.2f;
+    [SerializeField] private float jumpCooldown = 0.5f;
+    [SerializeField] private float inputSmoothing = 0.1f;
 
-    private Vector3 targetPosition;
-    private float currentSpeed = 0f; // Mevcut hız
+    [Header("Head IK Settings")]
+    [SerializeField] private float ikTargetDistance = 3f;
+    [SerializeField] private float ikTargetHeight = 1f;
+    [SerializeField] private float ikTargetSmoothSpeed = 5f;
+    [SerializeField] private float cameraInfluence = 0.7f; // Kameranın etki oranı (0-1)
+    [SerializeField] private float movementInfluence = 0.3f; // Hareketin etki oranı (0-1)
+
+    private Vector3 moveDirection = Vector3.zero;
+    private Vector3 smoothMoveDirection = Vector3.zero;
+    private Vector3 currentVelocity = Vector3.zero;
+    private float currentSpeed = 0f;
     private bool isMoving = false;
-    private bool isSprinting = false; // Sprint durumu
-    private bool isGrounded = false; // Zeminde olup olmadığını kontrol eder
-    private float rotationProgress = 0f; // Rotasyon ilerlemesi
-    private float jumpCooldownTimer = 0f; // Zıplama cooldown timer'ı
-
+    private bool isSprinting = false;
+    private bool isGrounded = false;
+    private float jumpCooldownTimer = 0f;
+    private bool isBoneInteracted = false;
+    private float boneInteractionTimer = 0f;
     
+    private Vector3 ikTargetPosition;
 
-    private bool isBoneInteracted = false; // Kemik ile etkileşim durumunu takip eder
-    private float boneInteractionTimer = 0f; // Kemik ile etkileşim süresi
-
-
-    public static PlayerController Instance { get; private set; } // Singleton
+    public static PlayerController Instance { get; private set; }
 
     private void Awake()
     {
         if (Instance == null)
         {
-            Instance = this; // Instance bu scriptin ilk oluşturulan örneği olur
+            Instance = this;
         }
         else
         {
-            Destroy(gameObject); // Eğer zaten bir Instance varsa, yenisini yok ederiz
+            Destroy(gameObject);
+        }
+
+        if (cameraTransform == null)
+        {
+            cameraTransform = Camera.main.transform;
         }
     }
 
@@ -58,30 +70,53 @@ public class PlayerController : MonoBehaviour
         kemik.SetActive(false);
         if (gameOverPanel != null)
         {
-            gameOverPanel.SetActive(false); // Başlangıçta panel kapalı
+            gameOverPanel.SetActive(false);
+        }
+
+        playerRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
+        playerRigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
+        playerRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
+        
+        if (headIKTarget != null)
+        {
+            ikTargetPosition = transform.position + transform.forward * ikTargetDistance + Vector3.up * ikTargetHeight;
+            headIKTarget.position = ikTargetPosition;
         }
     }
 
     private void Update()
     {
-        isSprinting = Input.GetKey(KeyCode.LeftShift); // Sprint için
-        cursorInfo();
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
 
-        if (Input.GetMouseButton(0)) // Sol tık basılıyken hareket
+        if (Mathf.Abs(horizontal) > 0.1f || Mathf.Abs(vertical) > 0.1f)
         {
-            RotateTowardsMouse();
-            isMoving = true; // Hareket etmeye başla
+            Vector3 cameraForward = cameraTransform.forward;
+            Vector3 cameraRight = cameraTransform.right;
+            
+            cameraForward.y = 0f;
+            cameraRight.y = 0f;
+            
+            cameraForward.Normalize();
+            cameraRight.Normalize();
+
+            moveDirection = (cameraForward * vertical + cameraRight * horizontal).normalized;
+            smoothMoveDirection = Vector3.SmoothDamp(smoothMoveDirection, moveDirection, ref currentVelocity, inputSmoothing);
+            
+            isMoving = true;
         }
         else
         {
-            isMoving = false; // Hareket etmeyi durdur
-            rotationProgress = 0f; // Hareket bitince rotasyon sıfırlanır
+            smoothMoveDirection = Vector3.SmoothDamp(smoothMoveDirection, Vector3.zero, ref currentVelocity, inputSmoothing);
+            isMoving = smoothMoveDirection.magnitude > 0.01f;
         }
+
+        isSprinting = Input.GetKey(KeyCode.LeftShift);
 
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded && jumpCooldownTimer <= 0f)
         {
             Jump();
-            jumpCooldownTimer = jumpCooldown; // Zıplama cooldown'ını başlat
+            jumpCooldownTimer = jumpCooldown;
         }
 
         if (jumpCooldownTimer > 0f)
@@ -92,8 +127,6 @@ public class PlayerController : MonoBehaviour
         playerAnimator.SetFloat("Speed", currentSpeed);
         playerAnimator.SetBool("isGrounded", isGrounded);
 
-
-        // Kemik etkileşimi varsa sprintMultiplier'ı artır
         if (isBoneInteracted)
         {
             boneInteractionTimer -= Time.deltaTime;
@@ -101,22 +134,22 @@ public class PlayerController : MonoBehaviour
 
             if (boneInteractionTimer <= 0f)
             {
-                // 5 saniye geçti, etkisini sona erdir
                 sprintMultiplier = 2.2f;
                 isBoneInteracted = false;
                 kemik.SetActive(false);
-
             }
         }
     }
-
+    
     private void FixedUpdate()
     {
         CheckGroundStatus();
+        UpdateHeadIKTarget();
 
         if (isMoving)
         {
-            MoveTowardsTarget();
+            RotateTowardsMovement();
+            MoveCharacter();
         }
         else
         {
@@ -130,79 +163,58 @@ public class PlayerController : MonoBehaviour
         {
             playerRigidbody.AddForce(Vector3.down * gravityScale, ForceMode.Acceleration);
         }
-    }
-
-    private void cursorInfo()
-    {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
+        else
         {
-            Vector3 targetPosition = hit.point;
-            _infoObject.transform.position = targetPosition;
+            Vector3 velocity = playerRigidbody.linearVelocity;
+            velocity.y = Mathf.Max(velocity.y, -5f);
+            playerRigidbody.linearVelocity = velocity;
         }
     }
 
-    private void RotateTowardsMouse()
+    private void RotateTowardsMovement()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
-
-        if (Physics.Raycast(ray, out hit, Mathf.Infinity, groundLayer))
+        if (smoothMoveDirection.magnitude > 0.1f)
         {
-            targetPosition = hit.point;
-            Vector3 direction = (targetPosition - playerRigidbody.position).normalized;
-            direction.y = 0;
-
-            if (direction != Vector3.zero)
-            {
-                Quaternion targetRotation = Quaternion.LookRotation(direction);
-
-                rotationProgress = Mathf.Clamp01(rotationProgress + Time.deltaTime / rotationTime);
-                float curveValue = rotationSpeedCurve.Evaluate(rotationProgress);
-
-                playerRigidbody.transform.rotation = Quaternion.Slerp(playerRigidbody.transform.rotation, targetRotation, curveValue);
-            }
+            Quaternion targetRotation = Quaternion.LookRotation(smoothMoveDirection);
+            playerRigidbody.transform.rotation = Quaternion.Slerp(
+                playerRigidbody.transform.rotation, 
+                targetRotation, 
+                rotationSpeed * Time.fixedDeltaTime
+            );
         }
     }
 
-    private void MoveTowardsTarget()
+    private void MoveCharacter()
     {
-        Vector3 moveDirection = (targetPosition - playerRigidbody.position).normalized;
-        moveDirection.y = 0;
-
         float targetSpeed = maxMoveSpeed * (isSprinting ? sprintMultiplier : 1f);
-
-        
-
         currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
 
-        playerRigidbody.MovePosition(playerRigidbody.position + moveDirection * currentSpeed * Time.fixedDeltaTime);
+        Vector3 movement = smoothMoveDirection * currentSpeed * Time.fixedDeltaTime;
+        playerRigidbody.MovePosition(playerRigidbody.position + movement);
     }
 
     private void SlowDown()
     {
-        if (currentSpeed > 0)
+        if (currentSpeed > 0.01f)
         {
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime);
-            playerRigidbody.MovePosition(playerRigidbody.position + playerRigidbody.transform.forward * currentSpeed * Time.fixedDeltaTime);
+            Vector3 movement = playerRigidbody.transform.forward * currentSpeed * Time.fixedDeltaTime;
+            playerRigidbody.MovePosition(playerRigidbody.position + movement);
         }
         else
         {
-            Vector3 velocity = playerRigidbody.velocity;
+            currentSpeed = 0f;
+            Vector3 velocity = playerRigidbody.linearVelocity;
             velocity.x = 0f;
             velocity.z = 0f;
-            playerRigidbody.velocity = velocity;
+            playerRigidbody.linearVelocity = velocity;
         }
     }
 
     private void Jump()
     {
         playerAnimator.SetTrigger("Jump");
-
         Vector3 forwardMovement = playerRigidbody.transform.forward * 2f;
-
         playerRigidbody.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
 
         if (isGrounded)
@@ -221,27 +233,43 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-    // Kemik ile etkileşime girildiğinde çağrılacak metod
     private void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Bone"))
         {
-            sprintMultiplier = 4.4f; // Sprint hızını 3'e çıkar
-            boneInteractionTimer = 5f; // 5 saniye süresince etki edecek
+            sprintMultiplier = 4.4f;
+            boneInteractionTimer = 5f;
             isBoneInteracted = true;
-
-            Destroy(other.gameObject); // Kemik yok edilir
-        }
-    }     
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("car")) // Araba ile çarpışma
-        {
-            // Araba ile çarpışmayı engelle
-            Physics.IgnoreCollision(collision.collider, GetComponent<Collider>());
-
-            Debug.Log("Köpek araba ile çarpıştı ama etkilenmedi!");
+            Destroy(other.gameObject);
         }
     }
-}
+    private void UpdateHeadIKTarget()
+    {
+        if (headIKTarget == null) return;
 
+        // Kameranın baktığı yön (yatay)
+        Vector3 cameraLookDirection = cameraTransform.forward;
+        cameraLookDirection.y = 0f;
+        cameraLookDirection.Normalize();
+
+        Vector3 targetPosition;
+
+        if (isMoving && smoothMoveDirection.magnitude > 0.1f)
+        {
+            // Hareket ederken: hem hareket yönü hem kamera yönünü karıştır
+            Vector3 movementDirection = smoothMoveDirection.normalized;
+            Vector3 blendedDirection = (movementDirection * movementInfluence + cameraLookDirection * cameraInfluence).normalized;
+            
+            targetPosition = transform.position + blendedDirection * ikTargetDistance + Vector3.up * ikTargetHeight;
+        }
+        else
+        {
+            // Duruyorken: sadece kamera yönüne bak
+            targetPosition = transform.position + cameraLookDirection * ikTargetDistance + Vector3.up * ikTargetHeight;
+        }
+
+        // Smooth geçiş
+        ikTargetPosition = Vector3.Lerp(ikTargetPosition, targetPosition, ikTargetSmoothSpeed * Time.deltaTime);
+        headIKTarget.position = ikTargetPosition;
+    }
+}

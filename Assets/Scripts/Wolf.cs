@@ -162,10 +162,6 @@ public class Wolf : MonoBehaviour
             yield return null;
         }
         Barking barking = FindObjectOfType<Barking>();
-        if (barking != null)
-        {
-            barking.OnWolfEscape();
-        }
         Debug.Log("Kurt saldırdıktan sonra kaçtı ve yok oldu.");
         Destroy(gameObject); // Destroy the wolf after it escapes
     }

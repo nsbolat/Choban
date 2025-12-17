@@ -295,7 +295,6 @@ public class SheepManager : MonoBehaviour
             if (isFirstSheepRejoin && Barking.Instance != null)
             {
                 Debug.Log("İlk koyun geri döndü, başarı paneli açılıyor.");
-                Barking.Instance.ShowBasariPanel(); // Başarı panelini göster
                 isFirstSheepRejoin = false; // Sonraki geri dönüşlerde paneli gösterme
             }
         }
