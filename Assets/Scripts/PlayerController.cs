@@ -9,8 +9,6 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Animator playerAnimator;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private GameObject kemik;
-    [SerializeField] private GameObject gameOverPanel;
     [SerializeField] private Transform cameraTransform;
     [SerializeField] private Transform headIKTarget;
 
@@ -67,12 +65,6 @@ public class PlayerController : MonoBehaviour
 
     private void Start()
     {
-        kemik.SetActive(false);
-        if (gameOverPanel != null)
-        {
-            gameOverPanel.SetActive(false);
-        }
-
         playerRigidbody.interpolation = RigidbodyInterpolation.Interpolate;
         playerRigidbody.collisionDetectionMode = CollisionDetectionMode.Continuous;
         playerRigidbody.constraints = RigidbodyConstraints.FreezeRotation;
@@ -86,8 +78,8 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        float horizontal = Input.GetAxisRaw("Horizontal");
+        float vertical = Input.GetAxisRaw("Vertical");
 
         if (Mathf.Abs(horizontal) > 0.1f || Mathf.Abs(vertical) > 0.1f)
         {
@@ -96,11 +88,8 @@ public class PlayerController : MonoBehaviour
             
             cameraForward.y = 0f;
             cameraRight.y = 0f;
-            
-            cameraForward.Normalize();
-            cameraRight.Normalize();
 
-            moveDirection = (cameraForward * vertical + cameraRight * horizontal).normalized;
+            moveDirection = (cameraForward.normalized * vertical + cameraRight.normalized * horizontal).normalized;
             smoothMoveDirection = Vector3.SmoothDamp(smoothMoveDirection, moveDirection, ref currentVelocity, inputSmoothing);
             
             isMoving = true;
@@ -108,7 +97,7 @@ public class PlayerController : MonoBehaviour
         else
         {
             smoothMoveDirection = Vector3.SmoothDamp(smoothMoveDirection, Vector3.zero, ref currentVelocity, inputSmoothing);
-            isMoving = smoothMoveDirection.magnitude > 0.01f;
+            isMoving = false;
         }
 
         isSprinting = Input.GetKey(KeyCode.LeftShift);
@@ -118,7 +107,7 @@ public class PlayerController : MonoBehaviour
             Jump();
             jumpCooldownTimer = jumpCooldown;
         }
-
+        
         if (jumpCooldownTimer > 0f)
         {
             jumpCooldownTimer -= Time.deltaTime;
@@ -126,26 +115,12 @@ public class PlayerController : MonoBehaviour
 
         playerAnimator.SetFloat("Speed", currentSpeed);
         playerAnimator.SetBool("isGrounded", isGrounded);
-
-        if (isBoneInteracted)
-        {
-            boneInteractionTimer -= Time.deltaTime;
-            kemik.SetActive(true);
-
-            if (boneInteractionTimer <= 0f)
-            {
-                sprintMultiplier = 2.2f;
-                isBoneInteracted = false;
-                kemik.SetActive(false);
-            }
-        }
     }
     
     private void FixedUpdate()
     {
         CheckGroundStatus();
-        UpdateHeadIKTarget();
-
+        
         if (isMoving)
         {
             RotateTowardsMovement();
@@ -169,6 +144,11 @@ public class PlayerController : MonoBehaviour
             velocity.y = Mathf.Max(velocity.y, -5f);
             playerRigidbody.linearVelocity = velocity;
         }
+    }
+
+    private void LateUpdate()
+    {
+        UpdateHeadIKTarget();
     }
 
     private void RotateTowardsMovement()
