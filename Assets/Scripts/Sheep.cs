@@ -88,16 +88,6 @@ public class Sheep : MonoBehaviour
             navAgent.SetDestination(targetPosition);
         }
     }
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("car") && collision.gameObject.GetComponent<Car_AI>().isMoving) // Eğer çarpan obje "Araba" tag'ine sahipse
-        {
-            Debug.Log("Koyun arabaya çarptı ve öldü!");
-            SheepManager.Instance.RemoveSheep(this); // Koyun sayısını azalt
-            Die();
-            Destroy(gameObject); // Koyunu yok et
-        }
-    }
     
     public void Die()
     {

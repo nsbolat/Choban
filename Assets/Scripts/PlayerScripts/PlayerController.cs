@@ -1,10 +1,12 @@
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class PlayerController : MonoBehaviour
 {
+    // Singleton Instance
     public static PlayerController Instance;
 
-    [Header("References")]
+    [Header("Bileşenler")]
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Animator animator;
     [SerializeField] private Transform groundCheck;
@@ -13,8 +15,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform headIKTarget;
 
     [Header("Movement")]
-    [SerializeField] private float maxMoveSpeed = 5f;
-    [SerializeField] private float sprintMultiplier = 1.5f;
+    [SerializeField] private float maxMoveSpeed = 3f;
+    [SerializeField] private float sprintMultiplier = 2.5f;
     [SerializeField] private float acceleration = 10f;
     [SerializeField] private float deceleration = 12f;
     [SerializeField] private float rotationSpeed = 12f;
@@ -33,15 +35,20 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float slopeSpeedMultiplier = 0.6f;
     [SerializeField] private float stickToGroundForce = 15f;
 
+    [Header("Tilt (Banking)")]
+    [SerializeField] private float tiltAngle = 10f; // Maksimum yatma açısı
+    [SerializeField] private float tiltSpeed = 8f;  // Yatma hızı
+
     [Header("Head IK")]
     [SerializeField] private float ikTargetDistance = 3f;
     [SerializeField] private float ikTargetHeight = 1.2f;
     [SerializeField] private float ikSmoothSpeed = 6f;
-    
+
     [Header("Head IK Limits")]
-    [SerializeField] private float maxHeadTurnAngle = 70f;   // derece
+    [SerializeField] private float maxHeadTurnAngle = 70f;
     [SerializeField] private float headIKDisableAngle = 100f;
 
+    // Özel Değişkenler
     private Vector3 moveInput;
     private Vector3 smoothMoveDir;
     private Vector3 smoothVelocity;
@@ -55,13 +62,20 @@ public class PlayerController : MonoBehaviour
     private RaycastHit groundHit;
     private Vector3 ikTargetPos;
 
+    // Public Properties
+    public float CurrentSpeed => currentSpeed;
+    public float MaxMoveSpeed => maxMoveSpeed;
+    public float SpeedRatio => currentSpeed / maxMoveSpeed; // 0-1 arası (Koşarken >1 olabilir)
+
     private void Awake()
     {
-        Instance = this;
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+
         if (!cameraTransform)
             cameraTransform = Camera.main.transform;
     }
-
+    
     private void Start()
     {
         rb.interpolation = RigidbodyInterpolation.Interpolate;
@@ -118,36 +132,88 @@ public class PlayerController : MonoBehaviour
 
     private void HandleMovement()
     {
-        if (smoothMoveDir.magnitude < 0.05f)
+        // 1. Hedef Hızı Belirle
+        float targetSpeed = 0f;
+        
+        // Input var mı? (Gürültü toleransı 0.05f)
+        if (smoothMoveDir.magnitude > 0.05f)
         {
+            // Input var, hedef hızı hesapla
+            targetSpeed = maxMoveSpeed * (isSprinting ? sprintMultiplier : 1f);
+            targetSpeed *= GetSlopeSpeedMultiplier();
+            
+            // Hızlanma
+            currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
+        }
+        else
+        {
+            // Input yok, yavaşla (Deceleration)
             currentSpeed = Mathf.MoveTowards(currentSpeed, 0f, deceleration * Time.fixedDeltaTime);
+        }
+
+        // Hız çok düşükse hareketi tamamen kes
+        if (currentSpeed < 0.01f)
+        {
+            currentSpeed = 0f;
             return;
         }
 
-        float targetSpeed = maxMoveSpeed * (isSprinting ? sprintMultiplier : 1f);
-        targetSpeed *= GetSlopeSpeedMultiplier();
-
-        currentSpeed = Mathf.MoveTowards(currentSpeed, targetSpeed, acceleration * Time.fixedDeltaTime);
-
-        Vector3 moveDir = smoothMoveDir;
+        // 2. Hareket Yönünü Belirle
+        // Eğer input varsa input yönünü kullan, yoksa karakterin baktığı yönü (momentum) kullan
+        Vector3 moveDir = smoothMoveDir.magnitude > 0.05f ? smoothMoveDir.normalized : transform.forward;
 
         if (isGrounded)
             moveDir = Vector3.ProjectOnPlane(moveDir, groundHit.normal).normalized;
 
+        // 3. Hareketi Uygula
         Vector3 movement = moveDir * currentSpeed * Time.fixedDeltaTime;
         rb.MovePosition(rb.position + movement);
     }
 
     private void RotateCharacter()
     {
-        if (smoothMoveDir.magnitude < 0.1f) return;
+        if (smoothMoveDir.magnitude < 0.1f) 
+        {
+            // Dururken tilt'i sıfırla
+            if (transform.rotation.z != 0)
+            {
+                Quaternion upright = Quaternion.Euler(0, transform.eulerAngles.y, 0);
+                rb.rotation = Quaternion.Slerp(rb.rotation, upright, tiltSpeed * Time.fixedDeltaTime);
+            }
+            return;
+        }
 
         Vector3 dir = smoothMoveDir;
         if (isGrounded)
             dir = Vector3.ProjectOnPlane(dir, groundHit.normal);
 
-        Quaternion targetRot = Quaternion.LookRotation(dir);
-        rb.rotation = Quaternion.Slerp(rb.rotation, targetRot, rotationSpeed * Time.fixedDeltaTime);
+        // Hedef Yön (Y Ekseninde)
+        Quaternion targetLookRot = Quaternion.LookRotation(dir);
+
+        // Tilt Hesaplama
+        // Hareket vektörü ile karakterin sağ vektörü arasındaki ilişkiyi kullanarak dönüş yönünü buluyoruz
+        // Ancak daha basit ve stabil yöntem: Input ve Hıza dayalı tilt
+        
+        float turnAmount = Vector3.SignedAngle(transform.forward, dir, Vector3.up);
+        float targetTiltZ = 0f;
+
+        // Sadece hareket halindeyken tilt yap
+        // Dönüş açısı çok keskinse daha çok yat
+        if (Mathf.Abs(turnAmount) > 1f) 
+        {
+            // turnAmount pozitif (sağa dönüş) -> Z negatif (sağa yatış) olmalı
+            float leanFactor = Mathf.Clamp(turnAmount / 45f, -1f, 1f); 
+            targetTiltZ = -leanFactor * tiltAngle * Mathf.Clamp01(SpeedRatio); 
+        }
+
+        // Mevcut rotasyonun Y ve X bileşenlerini koru, Z'yi tilt ile değiştir
+        Quaternion tiltRot = Quaternion.Euler(0, 0, targetTiltZ);
+        
+        // Final Rotasyon: Hedef Yön * Tilt
+        // Önce Y ekseninde dön, sonra Local Z'de yat
+        Quaternion finalRot = targetLookRot * tiltRot;
+
+        rb.rotation = Quaternion.Slerp(rb.rotation, finalRot, rotationSpeed * Time.fixedDeltaTime);
     }
 
     private void Jump()
@@ -155,7 +221,7 @@ public class PlayerController : MonoBehaviour
         isJumping = true;
         jumpGroundTimer = jumpGroundDisableTime;
 
-        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z);
+        rb.linearVelocity = new Vector3(rb.linearVelocity.x, 0f, rb.linearVelocity.z); // Hızı sıfırla
         rb.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
 
         animator.SetTrigger("Jump");
@@ -205,6 +271,7 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateAnimator()
     {
+        // interaction kodlarından kalan 'IsPushing' parametresini sildim
         animator.SetFloat("Speed", currentSpeed);
         animator.SetBool("isGrounded", isGrounded);
     }
@@ -223,10 +290,8 @@ public class PlayerController : MonoBehaviour
 
         float angleToCamera = Vector3.Angle(forward, camDir);
 
-        // Kamera arkadaysa → IK kapat
         if (angleToCamera > headIKDisableAngle)
         {
-            // IK hedefini öne doğru sabitle
             Vector3 forwardTarget =
                 transform.position +
                 forward * ikTargetDistance +
@@ -242,7 +307,6 @@ public class PlayerController : MonoBehaviour
             return;
         }
 
-        // Yumuşak sınır (açı kısıtlama)
         float t = Mathf.InverseLerp(maxHeadTurnAngle, headIKDisableAngle, angleToCamera);
         t = Mathf.Clamp01(1f - t);
 

@@ -17,6 +17,11 @@ public class CinemachineCameraController : MonoBehaviour
     [SerializeField] private float cameraDistance = 8f;
     [SerializeField] private float cameraHeight = 4f;
 
+    [Header("Dynamic FOV")]
+    [SerializeField] private float baseFOV = 40f;
+    [SerializeField] private float sprintFOV = 60f;
+    [SerializeField] private float fovSmoothTime = 5f;
+
     private float currentYaw;
     private float currentPitch = 30f;
     private float targetYaw;
@@ -32,6 +37,10 @@ public class CinemachineCameraController : MonoBehaviour
             currentYaw = cameraFollowTarget.eulerAngles.y;
             targetYaw = currentYaw;
         }
+        
+        // Başlangıç FOV ayarla
+        if (virtualCamera != null)
+            virtualCamera.Lens.FieldOfView = baseFOV;
     }
 
     private void FixedUpdate()
@@ -39,11 +48,34 @@ public class CinemachineCameraController : MonoBehaviour
         HandleMouseInput();
         HandleCursorLock();
     }
+    
+    private void Update()
+    {
+        HandleDynamicFOV();
+    }
 
     private void LateUpdate()
     {
         if (cameraFollowTarget == null) return;
         UpdateCameraPosition();
+    }
+
+    private void HandleDynamicFOV()
+    {
+        if (virtualCamera == null || PlayerController.Instance == null) return;
+
+        // Player hızına göre hedef FOV belirleme
+        // SpeedRatio: 0 (Duruyor) -> 1 (Yürüyor) -> >1 (Koşuyor)
+        float ratio = PlayerController.Instance.SpeedRatio;
+        
+        // Sadece 1'den hızlıysa (koşuyorsa) FOV artır
+        // maxMoveSpeed=3, sprintMultiplier=2.5 => Max SpeedRatio = 2.5
+        // t = (ratio - 1) / (2.5 - 1) = (ratio - 1) / 1.5
+        
+        float t = Mathf.Clamp01((ratio - 1f) / 1.5f);
+        float targetFOV = Mathf.Lerp(baseFOV, sprintFOV, t);
+
+        virtualCamera.Lens.FieldOfView = Mathf.Lerp(virtualCamera.Lens.FieldOfView, targetFOV, fovSmoothTime * Time.deltaTime);
     }
 
     private void HandleMouseInput()
