@@ -27,10 +27,24 @@ public class CinemachineCameraController : MonoBehaviour
     private float targetYaw;
     private float targetPitch = 30f;
 
+    // PlayerController referansını dinamik alacağız
+    private PlayerController attachedPlayer;
+
+    private void Awake()
+    {
+        attachedPlayer = GetComponent<PlayerController>();
+    }
+
     private void Start()
     {
-        Cursor.lockState = CursorLockMode.Locked;
-        Cursor.visible = false;
+        // Eğer bu script local oyuncuda çalışıyorsa, cursor'ı kilitle
+        // Bunu PlayerController'dan tetiklemek daha güvenli olabilir ama burada da durabilir.
+        // Ancak Network ortamında sadece "aktif" olduğunda çalışmalı.
+        if (isActiveAndEnabled)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
 
         if (cameraFollowTarget != null)
         {
@@ -38,9 +52,19 @@ public class CinemachineCameraController : MonoBehaviour
             targetYaw = currentYaw;
         }
         
-        // Başlangıç FOV ayarla
+        // Sanal kamera atanmamışsa sahnede ara (Main Camera üzerindeki Brain'den değil, CinemachineCamera arıyoruz)
+        if (virtualCamera == null)
+        {
+            virtualCamera = Object.FindFirstObjectByType<CinemachineCamera>();
+        }
+
         if (virtualCamera != null)
+        {
             virtualCamera.Lens.FieldOfView = baseFOV;
+            // Kameranın Follow hedefini bu objenin target'ı yap
+            if (cameraFollowTarget)
+                virtualCamera.Follow = cameraFollowTarget;
+        }
     }
 
     private void FixedUpdate()
@@ -62,15 +86,10 @@ public class CinemachineCameraController : MonoBehaviour
 
     private void HandleDynamicFOV()
     {
-        if (virtualCamera == null || PlayerController.Instance == null) return;
+        if (virtualCamera == null || attachedPlayer == null) return;
 
         // Player hızına göre hedef FOV belirleme
-        // SpeedRatio: 0 (Duruyor) -> 1 (Yürüyor) -> >1 (Koşuyor)
-        float ratio = PlayerController.Instance.SpeedRatio;
-        
-        // Sadece 1'den hızlıysa (koşuyorsa) FOV artır
-        // maxMoveSpeed=3, sprintMultiplier=2.5 => Max SpeedRatio = 2.5
-        // t = (ratio - 1) / (2.5 - 1) = (ratio - 1) / 1.5
+        float ratio = attachedPlayer.SpeedRatio;
         
         float t = Mathf.Clamp01((ratio - 1f) / 1.5f);
         float targetFOV = Mathf.Lerp(baseFOV, sprintFOV, t);
@@ -95,7 +114,6 @@ public class CinemachineCameraController : MonoBehaviour
     {
         Quaternion rotation = Quaternion.Euler(currentPitch, currentYaw, 0f);
 
-        // 🔥 HEIGHT & DISTANCE GERÇEKTEN KULLANILIYOR
         Vector3 offset = rotation * new Vector3(0f, cameraHeight, -cameraDistance);
         Vector3 targetPosition = transform.position + offset;
 
@@ -105,6 +123,7 @@ public class CinemachineCameraController : MonoBehaviour
 
     private void HandleCursorLock()
     {
+        // Sadece local oyuncu için çalışmalı (bu script sadece localde enable olacak)
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             Cursor.lockState = CursorLockMode.None;
@@ -116,5 +135,25 @@ public class CinemachineCameraController : MonoBehaviour
             Cursor.lockState = CursorLockMode.Locked;
             Cursor.visible = false;
         }
+    }
+    
+    // Dışarıdan kamerayı set etmek istersek
+    public void SetVirtualCamera(CinemachineCamera cam)
+    {
+        virtualCamera = cam;
+        if (virtualCamera != null && cameraFollowTarget != null)
+        {
+            virtualCamera.Follow = cameraFollowTarget;
+        }
+    }
+
+    public GameObject DetachReferenceTarget()
+    {
+        if (cameraFollowTarget != null)
+        {
+            cameraFollowTarget.SetParent(null);
+            return cameraFollowTarget.gameObject;
+        }
+        return null;
     }
 }

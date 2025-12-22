@@ -31,11 +31,11 @@ public class Sheep : MonoBehaviour
         }
 
         // Oyuncuya belirli mesafede mi?
-        if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) <= 5f)
+        if (PlayerController.LocalInstance != null && Vector3.Distance(transform.position, PlayerController.LocalInstance.transform.position) <= 5f)
         {
-            if (Input.GetKeyDown(KeyCode.E) && isEscaped) // "E" tuşuna basıldı mı?
+            if (Input.GetKeyDown(KeyCode.Q)) // "Q" tuşuna basıldı mı?
             {
-                RejoinFlock();
+                //EscapeToSpawnPoint();
             }
         }
 

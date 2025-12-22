@@ -58,8 +58,15 @@ public class WolfSpawner : MonoBehaviour
 
         foreach (var wolf in wolves)
         {
-            float distance = Vector3.Distance(wolf.transform.position, PlayerController.Instance.transform.position);
-            if (distance <= sendRadius)
+            if (PlayerController.LocalInstance != null)
+            {
+                float distance = Vector3.Distance(wolf.transform.position, PlayerController.LocalInstance.transform.position);
+                if (distance <= sendRadius)
+                {
+                    Debug.Log("Yakındaki kurt kaçış noktasına gönderiliyor!");
+                    wolf.StartEscapeAfterAttack(); // Kurdu kaçış fonksiyonuna yönlendir
+                }
+            }
             {
                 Debug.Log("Yakındaki kurt kaçış noktasına gönderiliyor!");
                 wolf.StartEscapeAfterAttack(); // Kurdu kaçış fonksiyonuna yönlendir

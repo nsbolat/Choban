@@ -292,11 +292,11 @@ public class SheepManager : MonoBehaviour
         // İlk kez geri dönen koyun olduğunda sadece bir kez bu paneli aktif et
         if (anySheepRejoined)
         {
-            if (isFirstSheepRejoin && Barking.Instance != null)
+            /*if (isFirstSheepRejoin && Barking.Instance != null)
             {
                 Debug.Log("İlk koyun geri döndü, başarı paneli açılıyor.");
                 isFirstSheepRejoin = false; // Sonraki geri dönüşlerde paneli gösterme
-            }
+            }*/
         }
     }
 

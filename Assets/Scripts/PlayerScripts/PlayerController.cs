@@ -1,17 +1,19 @@
+using Unity.Netcode;
 using UnityEngine;
+using Unity.Cinemachine;
 
 [RequireComponent(typeof(Rigidbody))]
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
-    // Singleton Instance
-    public static PlayerController Instance;
+    // Singleton Instance - Sadece Local Player için geçerli olacak
+    public static PlayerController LocalInstance;
 
     [Header("Bileşenler")]
     [SerializeField] private Rigidbody rb;
     [SerializeField] private Animator animator;
     [SerializeField] private Transform groundCheck;
     [SerializeField] private LayerMask groundLayer;
-    [SerializeField] private Transform cameraTransform;
+    [SerializeField] private Transform cameraTransform; // Artık dışarıdan atanmayabilir, dinamik bulunacak
     [SerializeField] private Transform headIKTarget;
 
     [Header("Movement")]
@@ -67,13 +69,78 @@ public class PlayerController : MonoBehaviour
     public float MaxMoveSpeed => maxMoveSpeed;
     public float SpeedRatio => currentSpeed / maxMoveSpeed; // 0-1 arası (Koşarken >1 olabilir)
 
+    // Unparent edilen kamerayı takip etmek için
+    private GameObject _detachedCameraGO;
+
+    public override void OnNetworkSpawn()
+    {
+        Debug.Log($"OnNetworkSpawn: NetId: {NetworkObjectId}, IsOwner: {IsOwner}");
+        
+        // Prefab üzerindeki Camera Controller'ı al
+        var camController = GetComponent<CinemachineCameraController>();
+        
+        // Prefab'in içindeki (Child) Cinemachine Kamerasını bul
+        var myVirtualCamera = GetComponentInChildren<CinemachineCamera>(true);
+
+        if (IsOwner)
+        {
+            LocalInstance = this;
+            
+            // Local oyuncuysak controller açık olsun
+            if (camController != null)
+            {
+                camController.enabled = true;
+                
+                if (myVirtualCamera != null)
+                {
+                    // Kendi kameramızı aktif edelim
+                    myVirtualCamera.gameObject.SetActive(true);
+                    
+                    // 🔥 ÖNEMLİ: CameraFollowTarget'ı oyuncudan ayır (Unparent)
+                    // Böylece oyuncu döndüğünde kamera titremez.
+                    _detachedCameraGO = camController.DetachReferenceTarget();
+
+                    camController.SetVirtualCamera(myVirtualCamera);
+                }
+                else
+                {
+                    Debug.LogError("Player Prefab'ının içinde 'CinemachineCamera' bulunamadı! Lütfen Prefab'e child olarak ekleyin.");
+                }
+            }
+            
+            // Input ve yön hesaplamaları için Main Camera (Listener) referansı al
+            if (Camera.main != null)
+            {
+                cameraTransform = Camera.main.transform;
+            }
+        }
+        else
+        {
+            // Diğer oyuncuların scripti bizim kameramızı yönetmesin
+            if (camController != null)
+                camController.enabled = false;
+                
+            // Diğer oyuncuların kamerası bizim ekranımızı ele geçirmesin
+            if (myVirtualCamera != null)
+                myVirtualCamera.gameObject.SetActive(false);
+        }
+    }
+
+    public override void OnNetworkDespawn()
+    {
+        // Oyuncu oyundan çıkarsa veya yok olursa, unparent yaptığımız kamerayı da temizleyelim
+        if (_detachedCameraGO != null)
+        {
+            Destroy(_detachedCameraGO);
+        }
+        
+        base.OnNetworkDespawn();
+    }
+
     private void Awake()
     {
-        if (Instance == null) Instance = this;
-        else Destroy(gameObject);
-
-        if (!cameraTransform)
-            cameraTransform = Camera.main.transform;
+        // Arka planda çalışmayı kod ile zorla
+        Application.runInBackground = true;
     }
     
     private void Start()
@@ -81,18 +148,30 @@ public class PlayerController : MonoBehaviour
         rb.interpolation = RigidbodyInterpolation.Interpolate;
         rb.collisionDetectionMode = CollisionDetectionMode.Continuous;
         rb.constraints = RigidbodyConstraints.FreezeRotation;
+        
         if (headIKTarget)
             ikTargetPos = headIKTarget.position;
     }
 
     private void Update()
     {
+        if (!IsOwner) return;
+
+        // Failsafe: Camera transform kayıpsa tekrar bulmayı dene
+        if (cameraTransform == null)
+        {
+            if (Camera.main != null) 
+                cameraTransform = Camera.main.transform;
+        }
+
         ReadInput();
         UpdateAnimator();
     }
 
     private void FixedUpdate()
     {
+        if (!IsOwner) return;
+
         CheckGround();
         HandleMovement();
         StickToGround();
@@ -102,6 +181,10 @@ public class PlayerController : MonoBehaviour
 
     private void LateUpdate()
     {
+        // IK herkes için çalışabilir (görsellik), ama inputa bağlıysa IsOwner gerekebilir. 
+        // Şimdilik sadece Owner için çalıştıralım, senkronizasyon için NetworkAnimator/Transform gerekecek.
+        if (!IsOwner) return; 
+        
         UpdateHeadIK();
     }
 
@@ -110,8 +193,25 @@ public class PlayerController : MonoBehaviour
         float h = Input.GetAxisRaw("Horizontal");
         float v = Input.GetAxisRaw("Vertical");
 
-        Vector3 camForward = cameraTransform.forward;
-        Vector3 camRight = cameraTransform.right;
+        Vector3 camForward = Vector3.forward;
+        Vector3 camRight = Vector3.right;
+
+        // CameraTransform varsa ona göre yön al, yoksa dünya koordinatlarını kullan
+        if (cameraTransform != null)
+        {
+            camForward = cameraTransform.forward;
+            camRight = cameraTransform.right;
+        }
+        else
+        {
+            // Debug için log (sürekli spamlamasın diye kontrol edilebilir ama şimdilik kalsın)
+            // Debug.LogWarning("Camera Transform yok, World space kullanılıyor.");
+        }
+
+        camForward.y = 0f;
+        camRight.y = 0f;
+
+        moveInput = (camForward.normalized * v + camRight.normalized * h).normalized;
         camForward.y = 0f;
         camRight.y = 0f;
 
@@ -278,7 +378,7 @@ public class PlayerController : MonoBehaviour
 
     private void UpdateHeadIK()
     {
-        if (!headIKTarget) return;
+        if (!headIKTarget || !cameraTransform) return;
 
         Vector3 camDir = cameraTransform.forward;
         camDir.y = 0f;

@@ -88,7 +88,7 @@ public class Wolf : MonoBehaviour
         // Saldırı bekleme süresini güncelle
         attackCooldown -= Time.deltaTime;
         
-        if (Vector3.Distance(transform.position, PlayerController.Instance.transform.position) <= 5f)
+        if (PlayerController.LocalInstance != null && Vector3.Distance(transform.position, PlayerController.LocalInstance.transform.position) <= 5f)
         {
             if (Input.GetKeyDown(KeyCode.Q)) // "Q" tuşuna basıldı mı?
             {
